@@ -2,43 +2,44 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct Node{
-    struct Node* next;
-    char* lexicalElement;
+struct Node
+{
+    struct Node *next;
+    char *lexicalElement;
 };
 
-char* getRule(FILE* grammer)
+char *getRule(FILE *grammer)
 {
-    char* buff;
-    buff = (char*)malloc(200 * sizeof(char));
-    fgets(buff,200,grammer);
+    char *buff;
+    buff = (char *)malloc(200 * sizeof(char));
+    fgets(buff, 200, grammer);
     return buff;
 }
 
 int main()
 {
-    FILE* grammer;
+    FILE *grammer;
     grammer = fopen("grammer.txt", "r");
-    struct Node* rules[142];
-    for(int j=0;j<142;j++)
+    struct Node *rules[142];
+    for (int j = 0; j < 142; j++)
     {
-        char* rule = getRule(grammer);
-        char* currentLexicalElement = strtok(rule," ");//it is the current lexical element
-        struct Node* currNode;
-        struct Node* head = currNode;
-        while(currentLexicalElement!=NULL)
+        char *rule = getRule(grammer);
+        char *currentLexicalElement = strtok(rule, " "); // it is the current lexical element
+
+        struct Node *currNode = (struct Node *)malloc(sizeof(struct Node));
+        struct Node *head = currNode;
+        while (currentLexicalElement != NULL)
         {
-            printf("%s",currentLexicalElement);
+            printf("%s", currentLexicalElement);
+
             currNode->lexicalElement = currentLexicalElement;
-            currentLexicalElement = strtok(NULL," ");
-            currNode=currNode->next;
-            currNode = (struct Node*)malloc(sizeof(struct Node));
-            
+
+            currentLexicalElement = strtok(NULL, " ");
+
+            currNode = currNode->next;
+            currNode = (struct Node *)malloc(sizeof(struct Node));
         }
-        rules[j]=head;
+        rules[j] = head;
     }
-    struct Node* table[numberOfNonTerminals][noOFTerminals];
-    
-
-
+    // struct Node* table[numberOfNonTerminals][noOFTerminals];
 }
