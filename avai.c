@@ -207,7 +207,7 @@ int main()
     // We have computed first and follow
 
     // Fill the parsing table
-    
+
     struct Node *parseTable[number_nt][number_t + 1] = {NULL};
     for (int i = 0; i < rows; i++)
     {
@@ -223,10 +223,11 @@ int main()
         if (isEpsilon(rhs->data))
         {
             struct Node *follow = nts[templ].follow;
-            while (follow->next != NULL)
+            while (follow != NULL)
             {
                 enum terminals tempr = follow->data;
                 parseTable[templ][tempr] = rules[i];
+                follow = follow->next;
             }
         }
         else
