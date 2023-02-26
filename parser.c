@@ -122,4 +122,5 @@ void first(struct Node** rules,struct Node* nonTerminal)
         }
     }
 >>>>>>> Stashed changes
+
 }

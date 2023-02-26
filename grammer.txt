@@ -1,7 +1,7 @@
-program moduleDeclations otherModules driverModule otherModules
-moduleDeclations moduleDeclation moduleDeclations
-moduleDeclations e
-moduleDeclation DECLARE MODULE ID SEMICOL
+program moduleDeclarations otherModules driverModule otherModules
+moduleDeclarations moduleDeclaration moduleDeclarations
+moduleDeclarations e
+moduleDeclaration DECLARE MODULE ID SEMICOL
 otherModules module otherModules
 otherModules e
 driverModule DRIVERDEF DRIVER PROGRAM DRIVERENDDEF moduleDef
