@@ -1,2 +1,1 @@
-
-            printf("%s", currentLexicalElement);
+initcopy

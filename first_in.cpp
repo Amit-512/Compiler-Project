@@ -1,7 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include <bits/stdc++.h>
+
 #define rows 142
 #define TABLE_SIZE 100
 #define MAX_PROBE 10
@@ -40,10 +38,10 @@ void insert(char *key, int value)
         }
         index = hash(key, i);
     }
-    map *new = (map *)malloc(sizeof(map));
-    new->key = key;
-    new->value = value;
-    hashtable[index] = new;
+    map *n = (map *)malloc(sizeof(map));
+    n->key = key;
+    n->value = value;
+    hashtable[index] = n;
 }
 
 // get the value associated with the given key from the hash table
@@ -136,33 +134,19 @@ void push(struct Node *curr, char *s)
     (curr->next)->data = s;
     (curr->next)->prev = curr;
 }
-struct Node *initcopy(struct Node *rec, struct Node *header)
+struct Node* initcopy(struct Node *rec, struct Node *header)
 {
     struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
     header = temp;
     temp->data = rec->data;
-    while (rec->next != NULL)
-    {
-        temp->next = (struct Node *)malloc(sizeof(struct Node));
-        (temp->next)->data = (rec->next)->data;
-        (temp->next)->prev = temp;
-        temp = temp->next;
-        rec = rec->next;
-    }
-    return temp;
+    return copy(temp, rec->next);
 }
 struct Node *findFirst(struct Node **rules, char *nonTerminal)
 {
     if (nts[get(nonTerminal)].first != NULL)
     {
-        printf("first of %s already calculated\n", nonTerminal);
         return nts[get(nonTerminal)].first;
     }
-    else
-    {
-        printf("first of %s not calculated\n", nonTerminal);
-    }
-    
     struct Node *currNode = NULL; // first
     struct Node *header = NULL;
     for (int i = 0; i < rows; i++)
@@ -170,6 +154,9 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
         if (strcmp(rules[i]->data, nonTerminal) == 0)
         {
             struct Node *temp = rules[i]->next; // first node of rhs
+            // printf("%s",(rules[i]->next)->data);
+
+            // enum myenum lhs = rules[i]->data;
             int lhs = get(rules[i]->data);
             if (isTerminal(temp->data))
             {
@@ -178,6 +165,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                 {
                     header = init(temp->data);
                     currNode = header;
+                    printf("%s\n", currNode->data);
                 }
                 else
                 {
@@ -187,7 +175,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
 
             else if (isEpsilon(temp->data))
             {
-                printf("%s has epsilon %s\n",nts[lhs].nonTerminal, temp->data);
+                printf("epsilon %s", temp->data);
                 nts[lhs].hasEpsilon = true;
             }
             else
@@ -204,23 +192,13 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                         break;
                     }
                     tempenum = get(temp->data);
-                    printf("entering %s\n",temp->data);
-                    struct Node* rec = findFirst(rules, temp->data);
-                    nts[get(temp->data)].first=rec;
-                    
-                    
-                    if(rec==NULL)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        printf("calculated first of %s as %s\n",temp->data,rec->data);
-                    }
-                    printf("coming out\n");
+                    printf("entering1 %s\n",temp->data);
+                    struct Node *rec;
+                    rec = findFirst(rules, temp->data);
+                    printf("1");
+                    printf("coming out of %s with value %s",temp->data,rec->data);
                     if (currNode == NULL)
                     {
-                        printf("initcopy\n");
                         currNode = initcopy(rec, header);
                     }
                     else
@@ -237,9 +215,8 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
         }
     }
     
-   
     nts[get(nonTerminal)].first = header;
-    if(header==NULL)return NULL;
+    printf("1 %s\n", header->data);
     return header;
 }
 int main()
