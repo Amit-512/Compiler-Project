@@ -6,80 +6,78 @@
 #define columns 200
 #define number_nt 71
 #define number_t 58
-enum nonterminals
+#define TABLE_SIZE 100
+#define MAX_PROBE 10
+
+typedef struct map
 {
-    program,
-    moduleDeclarations,
-    moduleDeclaration,
-    otherModules,
-    driverModule,
-    module,
-    ret,
-    input_plist,
-    n1,
-    output_plist,
-    n2,
-    dataType,
-    range_arrays,
-    type,
-    moduleDef,
-    statements,
-    statement,
-    ioStmt,
-    boolConst,
-    id_num_rnum,
-    var_print,
-    p1,
-    simpleStmt,
-    assignmentStmt,
-    whichStmt,
-    lvalueIDStmt,
-    lvalueARRStmt,
-    index_arr,
-    new_index,
-    sign,
-    moduleReuseStmt,
-    optional,
-    idList,
-    n3,
-    actual_para_list,
-    expression,
-    u,
-    new_NT,
-    var_id_num,
-    unary_op,
-    arithmeticOrBooleanExpr,
-    n7,
-    anyTerm,
-    n8,
-    arithmeticExpr,
-    n4,
-    term,
-    n5,
-    factor,
-    n_11,
-    element_index_with_expressions,
-    n_10,
-    arrExpr,
-    arr_n4,
-    arrTerm,
-    arr_n5,
-    arrFactor,
-    op1,
-    logicalOp,
-    relationalOp,
-    declareStmt,
-    conditionalStmt,
-    caseStmts,
-    n9,
-    value,
-    defaultP,
-    iterativeStmt,
-    range_for_loop,
-    index_for_loop,
-    new_index_for_loop,
-    sign_for_loop
-};
+    char *key;
+    int value;
+} map;
+
+map *hashtable[TABLE_SIZE];
+
+// hash function using quadratic probing
+int hash(char *key, int i)
+{
+    int hashval = 0;
+    for (int j = 0; j < strlen(key); j++)
+    {
+        hashval += key[j];
+    }
+    return (hashval + i * i) % TABLE_SIZE;
+}
+
+// insert a key-value pair into the hash table
+void insert(char *key, int value)
+{
+    int i = 0;
+    int index = hash(key, i);
+    while (hashtable[index] != NULL)
+    {
+        i++;
+        if (i > MAX_PROBE)
+        {
+            printf("Error: Maximum probing limit reached\n");
+            return;
+        }
+        index = hash(key, i);
+    }
+    map *new = (map *)malloc(sizeof(map));
+    new->key = key;
+    new->value = value;
+    hashtable[index] = new;
+}
+
+// get the value associated with the given key from the hash table
+int get(char *key)
+{
+    int i = 0;
+    int index = hash(key, i);
+    while (hashtable[index] != NULL)
+    {
+        if (strcmp(hashtable[index]->key, key) == 0)
+        {
+            return hashtable[index]->value;
+        }
+        i++;
+        if (i > MAX_PROBE)
+        {
+            printf("Error: Maximum probing limit reached\n");
+            return 0;
+        }
+        index = hash(key, i);
+    }
+    return 0;
+}
+
+void initNonTerminalsHashTable(char **nonTerminals)
+{
+    for (int i = 0; i < 71; i++)
+    {
+        insert(nonTerminals[i], i);
+    }
+}
 typedef enum terminals
 {
     // not terminals removed not required for now
