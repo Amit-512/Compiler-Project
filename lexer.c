@@ -1331,28 +1331,28 @@ void removeComments(char *testcaseFile, char *cleanFile)
     fclose(fp2);
 }
 
-int main()
-{
-    FILE *fp = fopen("sc.txt", "r");
-    if (fp == NULL)
-    {
-        printf("file hi nahi khuli\n");
-    }
+// int main()
+// {
+//     FILE *fp = fopen("sc.txt", "r");
+//     if (fp == NULL)
+//     {
+//         printf("file hi nahi khuli\n");
+//     }
 
-    Buffer *buff = getStream(fp);
+//     Buffer *buff = getStream(fp);
 
-    tokenInfo *tk = getNextToken(buff);
+//     tokenInfo *tk = getNextToken(buff);
 
-    while (tk->id != TK_EOF)
-    {
-        if (tk->id != LEXERROR)
-        {
-            printf("%s line:=%d\n", tk->lexeme, tk->lineNumber);
-        }
-        else
-        {
-            printf("bhai yeh error hai dhyaan se dekh-->%s line:=%d\n", tk->lexeme, tk->lineNumber);
-        }
-        tk = getNextToken(buff);
-    }
-}
+//     while (tk->id != TK_EOF)
+//     {
+//         if (tk->id != LEXERROR)
+//         {
+//             printf("%s line:=%d\n", tk->lexeme, tk->lineNumber);
+//         }
+//         else
+//         {
+//             printf("bhai yeh error hai dhyaan se dekh-->%s line:=%d\n", tk->lexeme, tk->lineNumber);
+//         }
+//         tk = getNextToken(buff);
+//     }
+// }
