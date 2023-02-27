@@ -105,15 +105,16 @@ bool isEpsilon(char *s) // works
 
 struct Node *copy(struct Node *n1, struct Node *n2)
 {
-    struct Node *temp = n1;
-    while (n2 != NULL)
+    
+    while(n2!=NULL)
     {
-        temp->next = (struct Node *)malloc(sizeof(struct Node));
-        (temp->next)->data = n2->data;
-        (temp->next)->prev = temp;
-        temp = temp->next;
+        struct Node* temp = (struct Node*) malloc(sizeof(struct Node));
+        temp->data = n2->data;
+        n1->next = temp;
+        n1 = n1->next;
+        n2 = n2->next;
     }
-    return temp;
+    return n1;
 }
 void initHashTable(char **nonTerminals)
 {
@@ -136,10 +137,10 @@ void push(struct Node *curr, char *s)
     (curr->next)->data = s;
     (curr->next)->prev = curr;
 }
-struct Node *initcopy(struct Node *rec, struct Node *header)
+struct Node *initcopy(struct Node *rec)
 {
     struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-    header = temp;
+    struct Node* header = temp;
     temp->data = rec->data;
     while (rec->next != NULL)
     {
@@ -149,18 +150,18 @@ struct Node *initcopy(struct Node *rec, struct Node *header)
         temp = temp->next;
         rec = rec->next;
     }
-    return temp;
+    return header;
 }
 struct Node *findFirst(struct Node **rules, char *nonTerminal)
 {
     if (nts[get(nonTerminal)].first != NULL)
     {
-        printf("first of %s already calculated\n", nonTerminal);
+        // printf("first of %s already calculated\n", nonTerminal);
         return nts[get(nonTerminal)].first;
     }
     else
     {
-        printf("first of %s not calculated\n", nonTerminal);
+        // printf("first of %s not calculated\n", nonTerminal);
     }
     
     struct Node *currNode = NULL; // first
@@ -173,7 +174,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
             int lhs = get(rules[i]->data);
             if (isTerminal(temp->data))
             {
-                printf("terminal %s\n", temp->data);
+                // printf("terminal %s\n", temp->data);
                 if (currNode == NULL)
                 {
                     header = init(temp->data);
@@ -187,12 +188,12 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
 
             else if (isEpsilon(temp->data))
             {
-                printf("%s has epsilon %s\n",nts[lhs].nonTerminal, temp->data);
+                // printf("%s has epsilon %s\n",nts[lhs].nonTerminal, temp->data);
                 nts[lhs].hasEpsilon = true;
             }
             else
             {
-                printf("non terminal %s \n",temp->data);
+                // printf("non terminal %s \n",temp->data);
                 // enum myenum tempenum;
                 int tempenum;
                 temp = temp->prev;
@@ -204,7 +205,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                         break;
                     }
                     tempenum = get(temp->data);
-                    printf("entering %s\n",temp->data);
+                    // printf("entering %s\n",temp->data);
                     struct Node* rec = findFirst(rules, temp->data);
                     nts[get(temp->data)].first=rec;
                     
@@ -215,13 +216,18 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                     }
                     else
                     {
-                        printf("calculated first of %s as %s\n",temp->data,rec->data);
+                        // printf("calculated first of %s\n",temp->data);
+                        // printf("as %s\n",rec->data);
                     }
-                    printf("coming out\n");
+                    // printf("coming out\n");
                     if (currNode == NULL)
                     {
-                        printf("initcopy\n");
-                        currNode = initcopy(rec, header);
+                        header = initcopy(rec);
+                        currNode= header;
+                        while(currNode->next!=NULL)
+                        {
+                            currNode=currNode->next;
+                        }
                     }
                     else
                     {
@@ -277,14 +283,24 @@ int main()
     for (int i = 0; i < 71; i++)
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
+        if(nts[i].first!=NULL)
+        {
+            printf("first of %s is %s\n", nts[i].nonTerminal, nts[i].first->data);
+        }
+        else
+        {
+            printf("first of %s is NULL\n", nts[i].nonTerminal);
+        }
     }
     for (int i = 0; i < 71; i++)
     {
-        // printf("%s %d\n",nts[i].nonTerminal,nts[i].hasEpsilon);
-        struct Node *header = nts[i].first;
-        // while(header!=NULL)
-        // {
-        //     printf("%s\n\n",header->data);
-        // }
+        if(nts[i].first!=NULL)
+        {
+            printf("first of %s is %s\n", nts[i].nonTerminal, nts[i].first->data);
+        }
+        else
+        {
+            printf("first of %s is NULL\n", nts[i].nonTerminal);
+        }
     }
 }

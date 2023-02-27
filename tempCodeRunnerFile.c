@@ -1,1 +1,1 @@
-initcopy
+printf
