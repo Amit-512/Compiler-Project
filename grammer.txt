@@ -9,15 +9,15 @@ module DEF MODULE ID ENDDEF TAKES INPUT SQBO input_plist SQBC SEMICOL ret module
 ret RETURNS SQBO output_plist SQBC SEMICOL
 ret e
 input_plist ID COLON dataType n1
-n1 COMMA ID COLON dataType n1
 n1 e
+n1 COMMA ID COLON dataType n1
 output_plist ID COLON type n2
 n2 COMMA ID COLON type
 n2 e
 dataType INTEGER
 dataType REAL
 dataType BOOLEAN
-dataType ARRAY SQBO range_arrays SQBC OF type
+dataType ARRAY SQBO   SQBC OF type
 range_arrays index_arr RANGEOP index_arr
 type INTEGER
 type REAL
@@ -96,10 +96,9 @@ factor boolConst
 factor ID n_11
 n_11 SQBO element_index_with_expressions SQBC
 n_11 e
-element_index_with_expressions sign n_10
-element_index_with_expressions arrExpr
-n_10 new_index
-n_10 BO arrExpr BC
+element_index_with_expressions sign n10
+element_index_with_expressions arrExpr new_index
+n10 BO arrExpr BC
 arrExpr arrTerm arr_n4
 arr_n4 op1 arrTerm arr_n4
 arr_n4 e
