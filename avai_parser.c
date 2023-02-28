@@ -205,15 +205,16 @@ bool isEpsilon(char *s) // works
 }
 struct Node *copy(struct Node *n1, struct Node *n2)
 {
-    struct Node *temp = n1;
+
     while (n2 != NULL)
     {
-        temp->next = (struct Node *)malloc(sizeof(struct Node));
-        (temp->next)->data = n2->data;
-        (temp->next)->prev = temp;
-        temp = temp->next;
+        struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
+        temp->data = n2->data;
+        n1->next = temp;
+        n1 = n1->next;
+        n2 = n2->next;
     }
-    return temp;
+    return n1;
 }
 void initHashTableNT(char **nonTerminals)
 {
@@ -242,10 +243,10 @@ void push(struct Node *curr, char *s)
     (curr->next)->data = s;
     (curr->next)->prev = curr;
 }
-struct Node *initcopy(struct Node *rec, struct Node *header)
+struct Node *initcopy(struct Node *rec)
 {
     struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-    header = temp;
+    struct Node *header = temp;
     temp->data = rec->data;
     while (rec->next != NULL)
     {
@@ -255,18 +256,16 @@ struct Node *initcopy(struct Node *rec, struct Node *header)
         temp = temp->next;
         rec = rec->next;
     }
-    return temp;
+    return header;
 }
+
 struct Node *findFirst(struct Node **rules, char *nonTerminal)
 {
+
     if (nts[getNT(nonTerminal)].first != NULL)
     {
-        printf("first of %s already calculated\n", nonTerminal);
+
         return nts[getNT(nonTerminal)].first;
-    }
-    else
-    {
-        printf("first of %s not calculated\n", nonTerminal);
     }
 
     struct Node *currNode = NULL; // first
@@ -279,7 +278,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
             int lhs = getNT(rules[i]->data);
             if (isTerminal(temp->data))
             {
-                printf("terminal %s\n", temp->data);
+
                 if (currNode == NULL)
                 {
                     header = init(temp->data);
@@ -293,23 +292,21 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
 
             else if (isEpsilon(temp->data))
             {
-                printf("%s has epsilon %s\n", nts[lhs].nonTerminal, temp->data);
                 nts[lhs].hasEpsilon = true;
             }
             else
             {
-                printf("non terminal %s \n", temp->data);
                 int tempenum;
                 temp = temp->prev;
                 do
                 {
+
                     temp = temp->next;
                     if (temp == NULL)
                     {
                         break;
                     }
                     tempenum = getNT(temp->data);
-                    printf("entering %s\n", temp->data);
                     struct Node *rec = findFirst(rules, temp->data);
                     nts[getNT(temp->data)].first = rec;
 
@@ -317,15 +314,14 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                     {
                         break;
                     }
-                    else
-                    {
-                        printf("calculated first of %s as %s\n", temp->data, rec->data);
-                    }
-                    printf("coming out\n");
                     if (currNode == NULL)
                     {
-                        printf("initcopy\n");
-                        currNode = initcopy(rec, header);
+                        header = initcopy(rec);
+                        currNode = header;
+                        while (currNode->next != NULL)
+                        {
+                            currNode = currNode->next;
+                        }
                     }
                     else
                     {
@@ -346,7 +342,6 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
         return NULL;
     return header;
 }
-
 void fillParserTable(struct Node ***parseTable, struct Node **rules)
 {
     for (int i = 0; i < rows; i++)
@@ -466,19 +461,50 @@ void parser(struct Node ***parseTable, struct Node **rules)
         }
     }
 }
+void printParseTable(struct Node ***parseTable, char **terminals, char **nonterminals, int t_count, int nt_count)
+{
+    FILE *fp = fopen("output.csv", "w");
+
+    for (int i = 0; i < t_count; i++)
+    {
+        fprintf(fp, ",%s", terminals[i]);
+    }
+
+    fprintf(fp, "\n");
+
+    for (int row = 0; row < nt_count; row++)
+    {
+        fprintf(fp, "%s", nonterminals[row]);
+
+        for (int col = 0; col < t_count; col++)
+        {
+            fprintf(fp, ",");
+
+            struct Node *curr = parseTable[row][col];
+            while (curr != NULL)
+            {
+                fprintf(fp, "%s..", curr->data);
+            }
+        }
+
+        fprintf(fp, '\n');
+    }
+
+    fclose(fp);
+}
 int main()
 {
-    printf("Hello world\n");
     initHashTableNT(nonTerminals);
     initHashTableT(Terminals);
     FILE *grammer;
     grammer = fopen("grammer.txt", "r");
-    struct Node *rules[142];
-    bool epsilon[142];
-    for (int j = 0; j < 142; j++)
+    struct Node *rules[rows];
+    bool epsilon[rows];
+    for (int j = 0; j < rows; j++)
     {
         char *rule = getRule(grammer);
         rule[strcspn(rule, "\n")] = 0;
+        rule[strcspn(rule, "\r")] = 0;
         char *currentLexicalElement = strtok(rule, " "); // it is the current lexical element
         struct Node *currNode = (struct Node *)malloc(sizeof(struct Node));
         struct Node *head = currNode;
@@ -492,16 +518,19 @@ int main()
         }
         rules[j] = head;
     }
-    for (int i = 0; i < number_nt; i++)
+    char *s = ((rules[52]->next)->next)->data;
+    // enum nonTerminals nonTerminal;
+    for (int i = 0; i < 71; i++)
     {
         nts[i].nonTerminal = nonTerminals[i];
         nts[i].hasEpsilon = false;
         nts[i].completed = false;
     }
-    for (int i = 0; i < number_nt; i++)
+    for (int i = 0; i < 71; i++)
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
     }
+    // First Done
     // We have computed first and follow
 
     // Fill the parsing table

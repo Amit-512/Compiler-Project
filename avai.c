@@ -273,16 +273,5 @@ int main()
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
     }
-    for (int i = 0; i < 71; i++)
-    {
-        struct Node *temp = nts[i].first;
-        printf("first of %s \n", nonTerminals[i]);
-        fflush(stdout);
-        while (temp != NULL)
-        {
-            printf("%s \n\n", temp->data);
-            fflush(stdout);
-            temp = temp->next;
-        }
-    }
+    // First Done
 }
