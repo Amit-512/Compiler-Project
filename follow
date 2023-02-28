@@ -1,0 +1,691 @@
+follow of program is 
+$ 
+
+follow of moduleDeclarations is 
+DEF 
+
+follow of moduleDeclaration is 
+DECLARE 
+DECLARE 
+
+follow of otherModules is 
+DRIVERDEF 
+
+follow of driverModule is 
+DEF 
+DRIVERDEF 
+
+follow of module is 
+DEF 
+DEF 
+
+follow of ret is 
+START 
+
+follow of input_plist is 
+SQBC 
+ID 
+
+follow of n1 is 
+COMMA 
+
+follow of output_plist is 
+SQBC 
+ID 
+
+follow of n2 is 
+COMMA 
+
+follow of dataType is 
+COMMA 
+SEMICOL 
+
+follow of range_arrays is 
+SQBC 
+
+follow of type is 
+COMMA 
+BOOLEAN 
+
+follow of moduleDef is 
+DEF 
+START 
+
+follow of statements is 
+END 
+END 
+
+follow of statement is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+
+follow of ioStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+PRINT 
+
+follow of boolConst is 
+TRUE 
+
+follow of id_num_rnum is 
+ID 
+RNUM 
+
+follow of var_print is 
+BC 
+RNUM 
+
+follow of p1 is 
+TRUE 
+FALSE 
+RNUM 
+
+follow of simpleStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+
+follow of assignmentStmt is 
+ID 
+SQBO 
+ID 
+
+follow of whichStmt is 
+ASSIGNOP 
+SQBO 
+
+follow of lvalueIDStmt is 
+ASSIGNOP 
+SQBO 
+ASSIGNOP 
+
+follow of lvalueARRStmt is 
+ASSIGNOP 
+SQBO 
+
+follow of index_arr is 
+RANGEOP 
+
+follow of new_index is 
+NUM 
+ID 
+
+follow of sign is 
+NUM 
+ID 
+
+follow of moduleReuseStmt is 
+ID 
+
+follow of optional is 
+USE 
+
+follow of idList is 
+SQBC 
+COLON 
+
+follow of n3 is 
+COMMA 
+
+follow of actual_para_list is 
+SEMICOL 
+ID 
+
+follow of expression is 
+SEMICOL 
+
+follow of u is 
+PLUS 
+MINUS 
+
+follow of new_NT is 
+BO 
+ID 
+RNUM 
+
+follow of var_id_num is 
+ID 
+RNUM 
+RNUM 
+
+follow of unary_op is 
+BO 
+ID 
+RNUM 
+MINUS 
+
+follow of arithmeticOrBooleanExpr is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+PLUS 
+MINUS 
+BC 
+
+follow of n7 is 
+AND 
+OR 
+
+follow of anyTerm is 
+AND 
+OR 
+
+follow of n8 is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+
+follow of arithmeticExpr is 
+BC 
+
+follow of n4 is 
+PLUS 
+MINUS 
+
+follow of term is 
+PLUS 
+MINUS 
+
+follow of n5 is 
+MUL 
+DIV 
+
+follow of factor is 
+MUL 
+DIV 
+ID 
+
+follow of n_11 is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+PLUS 
+MINUS 
+
+follow of element_index_with_expressions is 
+SQBC 
+
+follow of n10 is 
+PLUS 
+MINUS 
+NUM 
+ID 
+BO 
+ID 
+TRUE 
+FALSE 
+BO 
+BO 
+
+follow of arrExpr is 
+NUM 
+ID 
+BO 
+BC 
+
+follow of arr_n4 is 
+PLUS 
+MINUS 
+
+follow of arrTerm is 
+PLUS 
+MINUS 
+
+follow of arr_n5 is 
+MUL 
+DIV 
+
+follow of arrFactor is 
+MUL 
+DIV 
+BO 
+
+follow of op1 is 
+BO 
+TRUE 
+FALSE 
+ID 
+MINUS 
+
+follow of logicalOp is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+OR 
+
+follow of relationalOp is 
+BO 
+TRUE 
+FALSE 
+ID 
+NE 
+
+follow of declareStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+DECLARE 
+
+follow of conditionalStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+SWITCH 
+
+follow of caseStmts is 
+DEFAULT 
+CASE 
+
+follow of n9 is 
+CASE 
+
+follow of value is 
+COLON 
+FALSE 
+
+follow of default is 
+END 
+
+follow of iterativeStmt is 
+GET_VALUE 
+PRINT 
+WHILE 
+
+follow of range_for_loop is 
+BC 
+
+follow of index_for_loop is 
+RANGEOP 
+
+follow of new_index_for_loop is 
+NUM 
+NUM 
+
+follow of sign_for_loop is 
+NUM 
+MINUS 
+
+follow of program is 
+$ 
+
+follow of moduleDeclarations is 
+DECLARE 
+
+follow of moduleDeclaration is 
+DECLARE 
+DECLARE 
+
+follow of otherModules is 
+DRIVERDEF 
+
+follow of driverModule is 
+DEF 
+DRIVERDEF 
+
+follow of module is 
+DEF 
+DEF 
+
+follow of ret is 
+START 
+
+follow of input_plist is 
+SQBC 
+ID 
+
+follow of n1 is 
+COMMA 
+
+follow of output_plist is 
+SQBC 
+ID 
+
+follow of n2 is 
+COMMA 
+
+follow of dataType is 
+COMMA 
+SEMICOL 
+
+follow of range_arrays is 
+SQBC 
+
+follow of type is 
+COMMA 
+BOOLEAN 
+
+follow of moduleDef is 
+DEF 
+START 
+
+follow of statements is 
+END 
+END 
+
+follow of statement is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+
+follow of ioStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+PRINT 
+
+follow of boolConst is 
+TRUE 
+
+follow of id_num_rnum is 
+ID 
+RNUM 
+
+follow of var_print is 
+BC 
+RNUM 
+
+follow of p1 is 
+TRUE 
+FALSE 
+RNUM 
+
+follow of simpleStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+
+follow of assignmentStmt is 
+ID 
+SQBO 
+ID 
+
+follow of whichStmt is 
+ASSIGNOP 
+SQBO 
+
+follow of lvalueIDStmt is 
+ASSIGNOP 
+SQBO 
+ASSIGNOP 
+
+follow of lvalueARRStmt is 
+ASSIGNOP 
+SQBO 
+
+follow of index_arr is 
+RANGEOP 
+
+follow of new_index is 
+NUM 
+ID 
+
+follow of sign is 
+NUM 
+ID 
+
+follow of moduleReuseStmt is 
+ID 
+
+follow of optional is 
+USE 
+
+follow of idList is 
+SQBC 
+COLON 
+
+follow of n3 is 
+COMMA 
+
+follow of actual_para_list is 
+SEMICOL 
+ID 
+
+follow of expression is 
+SEMICOL 
+
+follow of u is 
+PLUS 
+MINUS 
+
+follow of new_NT is 
+BO 
+ID 
+RNUM 
+
+follow of var_id_num is 
+ID 
+RNUM 
+RNUM 
+
+follow of unary_op is 
+BO 
+ID 
+RNUM 
+MINUS 
+
+follow of arithmeticOrBooleanExpr is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+PLUS 
+MINUS 
+BC 
+
+follow of n7 is 
+AND 
+OR 
+
+follow of anyTerm is 
+AND 
+OR 
+
+follow of n8 is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+
+follow of arithmeticExpr is 
+BC 
+
+follow of n4 is 
+PLUS 
+MINUS 
+
+follow of term is 
+PLUS 
+MINUS 
+
+follow of n5 is 
+MUL 
+DIV 
+
+follow of factor is 
+MUL 
+DIV 
+ID 
+
+follow of n_11 is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+PLUS 
+MINUS 
+
+follow of element_index_with_expressions is 
+SQBC 
+
+follow of n10 is 
+PLUS 
+MINUS 
+NUM 
+ID 
+BO 
+ID 
+TRUE 
+FALSE 
+BO 
+BO 
+
+follow of arrExpr is 
+NUM 
+ID 
+BO 
+BC 
+
+follow of arr_n4 is 
+PLUS 
+MINUS 
+
+follow of arrTerm is 
+PLUS 
+MINUS 
+
+follow of arr_n5 is 
+MUL 
+DIV 
+
+follow of arrFactor is 
+MUL 
+DIV 
+BO 
+
+follow of op1 is 
+BO 
+TRUE 
+FALSE 
+ID 
+MINUS 
+
+follow of logicalOp is 
+BO 
+TRUE 
+FALSE 
+ID 
+TRUE 
+FALSE 
+OR 
+
+follow of relationalOp is 
+BO 
+TRUE 
+FALSE 
+ID 
+NE 
+
+follow of declareStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+DECLARE 
+
+follow of conditionalStmt is 
+GET_VALUE 
+PRINT 
+ID 
+SQBO 
+DECLARE 
+SWITCH 
+FOR 
+WHILE 
+SWITCH 
+
+follow of caseStmts is 
+DEFAULT 
+CASE 
+
+follow of n9 is 
+CASE 
+
+follow of value is 
+COLON 
+FALSE 
+
+follow of default is 
+END 
+
+follow of iterativeStmt is 
+GET_VALUE 
+PRINT 
+WHILE 
+
+follow of range_for_loop is 
+BC 
+
+follow of index_for_loop is 
+RANGEOP 
+
+follow of new_index_for_loop is 
+NUM 
+NUM 
+
+follow of sign_for_loop is 
+NUM 
+MINUS 

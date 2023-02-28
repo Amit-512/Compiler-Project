@@ -235,13 +235,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
 }
 
 struct Node* findFollow(struct Node **rules, char *nonTerminal)
-{
-    
-    if(nts[get(nonTerminal)].follow!=NULL)
-    {
-        return nts[get(nonTerminal)].follow;
-    }
-   
+{ 
     struct Node* currNode=NULL;
     struct Node* header=NULL;
     for(int i=0;i<rows;i++)
@@ -252,20 +246,20 @@ struct Node* findFollow(struct Node **rules, char *nonTerminal)
         {
             if(strcmp(temp->data,nonTerminal)==0)
             {
-                
-                if(temp->next->data==NULL)
+                printf("found %s in %d\n",nonTerminal,i);
+                fflush(stdout);
+                if(temp->next==NULL)
                 {
+                    printf("Next is NULL ");
                     if(strcmp(rules[i]->data,nonTerminal)==0)
                     {
-                        break;
+                        printf("hence we ignor it ");
                     }
                     else
                     {
+                        printf("hence we find follow of %s ",rules[i]->data);
                         struct Node* rec=findFollow(rules,rules[i]->data);
-                        if(rec==NULL)
-                        {
-                            break;
-                        }
+                        
                         if(header==NULL)
                         {
                             header=initcopy(rec);
@@ -277,39 +271,36 @@ struct Node* findFollow(struct Node **rules, char *nonTerminal)
                         }
                         else
                         {
-                            currNode->next=nts[get(rules[i]->data)].follow;
-                            while(currNode->next!=NULL)
-                            {
-                                currNode=currNode->next;
-                            }
+                            currNode = copy(currNode,rec);
                         }
                     }
                 }
                 else
                 {
-                    struct Node* next_pointer=temp->next;
+                    printf("Next is not NULL ");
                     if(isTerminal(temp->next->data))
                     {
-                        
+                        printf("Next is terminal");
                         if(header==NULL)
                         {
+                            printf("new follow list");
                             header=init(temp->next->data);
                             currNode=header;
                         }
                         else
                         {
+                            printf("new follow item");
                             push(currNode,temp->next->data);
                         }
                     }
                     else
                     {
+                        printf("Next is non terminal ");
                         struct Node* rec=findFirst(rules,temp->next->data);
-                        if(rec==NULL)
-                        {
-                            break;
-                        }
+                        
                         if(header==NULL)
                         {
+                            printf("new follow list ");
                             header=initcopy(rec);
                             currNode=header;
                             while(currNode->next!=NULL)
@@ -319,14 +310,45 @@ struct Node* findFollow(struct Node **rules, char *nonTerminal)
                         }
                         else
                         {
-                            currNode->next=nts[get(nonTerminal)].follow;
-                            while(currNode->next!=NULL)
+                            printf("add follow of %s to follow list ",temp->next->data);
+                            currNode = copy(currNode,rec);
+                        }
+                        bool flag = nts[get(temp->next->data)].hasEpsilon;
+                        struct Node* aise=temp->next;
+                        while(flag)
+                        {
+                            printf("%s is nullable ",aise->data);
+                            aise = aise->next;
+                            if(aise!=NULL)
+                            printf("entered while with aise = %s",aise->data);
+                            if(aise==NULL)
                             {
-                                currNode=currNode->next;
+                                printf("aise is null");
+                                struct Node* followlhs = findFollow(rules,rules[i]->data);
+                                currNode = copy(currNode,followlhs);
+                                break;
+                            }
+                            else if(isTerminal(aise->data))
+                            {
+                                push(currNode,aise->data);
+                                currNode = currNode->next;
+                                break;
+                            }
+                            else
+                            {
+                                struct Node* rec=findFirst(rules,aise->data);
+                                
+                                currNode = copy(currNode,rec);
+                            }
+                            flag = nts[get(aise->data)].hasEpsilon; 
+                            if(!flag)
+                            {
+                                printf("not nullable %s",aise->data);
                             }
                         }
                     }
                 }
+                printf("\n");
             }
             temp=temp->next;
         }
@@ -370,18 +392,6 @@ int main()
         nts[i].hasEpsilon = false;
         nts[i].completed = false;
     }
-    for(int i=0;i<rows;i++)
-    {
-        int cnt=0;
-        struct Node* temp = rules[i];
-        while(temp!=NULL)
-        {
-            cnt++;
-            temp=temp->next;
-        }
-        printf("%d\n",cnt);
-        fflush(stdout);
-    }
     for (int i = 0; i < 71; i++)
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
@@ -389,22 +399,22 @@ int main()
     
     nts[0].follow = init("$");
     nts[1].follow = findFollow(rules, nonTerminals[1]);
-    for (int i = 1; i < 71; i++)
-    {
-        nts[i].follow = findFollow(rules, nonTerminals[i]);
-    }
-    for(int i=0;i<71;i++)
-    {
-        struct Node* temp=nts[i].follow;
-        printf("follow of %s is \n",nts[i].nonTerminal);
-        fflush(stdout);
-        while(temp!=NULL)
-        {
-            printf("%s \n",temp->data);
-            fflush(stdout);
-            temp=temp->next;
-        }   
-        printf("\n");
-        fflush(stdout);
-    }
+    // for (int i = 1; i < 71; i++)
+    // {
+    //     nts[i].follow = findFollow(rules, nonTerminals[i]);
+    // }
+    // for(int i=0;i<71;i++)
+    // {
+    //     struct Node* temp=nts[i].follow;
+    //     printf("follow of %s is \n",nts[i].nonTerminal);
+    //     fflush(stdout);
+    //     while(temp!=NULL)
+    //     {
+    //         printf("%s \n",temp->data);
+    //         fflush(stdout);
+    //         temp=temp->next;
+    //     }   
+    //     printf("\n");
+    //     fflush(stdout);
+    // }
 }
