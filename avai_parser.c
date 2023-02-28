@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-// #include "lexer.h"
-// #include "lexerDef.h"
+#include "lexerDef.h"
+#include "lexer.h"
 #define rows 142
 #define TABLE_SIZE 100
 #define MAX_PROBE 10
@@ -32,9 +32,9 @@ struct nonTerminalStruct
 map *hashTableNonTerminals[TABLE_SIZE];
 map *hashTableTerminals[TABLE_SIZE];
 // Stack Functions using linked List
-char *peek(struct Node **top)
+char *peek(struct Node *top)
 {
-    struct Node *n = *top;
+    struct Node *n = top;
     return n->data;
 }
 int isEmpty(struct Node *top)
@@ -75,18 +75,18 @@ struct Node *stackPush(struct Node *top, char *x)
         return top;
     }
 }
-char *pop(struct Node **top)
+char *pop(struct Node *top)
 {
-    if (isEmpty(*top))
+    if (isEmpty(top))
     {
         printf("Stack Underflow\n");
     }
     else
     {
-        struct Node *n = *top;
-        *top = (*top)->next;
-        char *x[20];
-        strcpy(x, n);
+        struct Node *n = top;
+        top = (top)->next;
+        char *x;
+        strcpy(x, n->data);
         free(n);
         return x;
     }
@@ -112,7 +112,8 @@ void insertNT(char *key, int value)
         i++;
         if (i > MAX_PROBE)
         {
-            printf("Error: Maximum probing limit reached\n");
+            printf("%s\n", key);
+            printf("Error: 1Maximum probing limit reached\n");
             return;
         }
         index = hash(key, i);
@@ -131,6 +132,7 @@ void insertT(char *key, int value)
         i++;
         if (i > MAX_PROBE)
         {
+            printf("%s\n", key);
             printf("Error: Maximum probing limit reached\n");
             return;
         }
@@ -155,6 +157,7 @@ int getNT(char *key)
         i++;
         if (i > MAX_PROBE)
         {
+            printf("%s ", key);
             printf("Error: Maximum probing limit reached\n");
             return 0;
         }
@@ -288,6 +291,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                 else
                 {
                     push(currNode, temp->data);
+                    currNode = currNode->next;
                 }
             }
 
@@ -305,6 +309,12 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                     temp = temp->next;
                     if (temp == NULL)
                     {
+                        break;
+                    }
+                    if (isTerminal(temp->data))
+                    {
+                        push(currNode, temp->data);
+                        currNode = currNode->next;
                         break;
                     }
                     tempenum = getNT(temp->data);
@@ -343,8 +353,8 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
         return NULL;
     return header;
 }
-/*
-void fillParserTable(struct Node ***parseTable, struct Node **rules)
+
+void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node **rules)
 {
     for (int i = 0; i < rows; i++)
     {
@@ -352,12 +362,13 @@ void fillParserTable(struct Node ***parseTable, struct Node **rules)
         bool flag = false;
         int templ = getNT(lhs->data);
         struct Node *rhs = rules[i]->next;
+        printf("%s\n", rhs->data);
         if (isTerminal(rhs->data))
         {
             int tempr = getT(rhs->data);
             parseTable[templ][tempr] = rules[i];
         }
-        if (isEpsilon(rhs->data))
+        else if (isEpsilon(rhs->data))
         {
             struct Node *follow = nts[templ].follow;
             while (follow != NULL)
@@ -410,7 +421,7 @@ void fillParserTable(struct Node ***parseTable, struct Node **rules)
         }
     }
 }
-void parser(struct Node ***parseTable, struct Node **rules)
+void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
 {
     FILE *fp = fopen("sc.txt", "r");
     if (fp == NULL)
@@ -422,12 +433,12 @@ void parser(struct Node ***parseTable, struct Node **rules)
     stack = stackPush(stack, "TK_EOF");
     stack = stackPush(stack, "program");
     Buffer *buff = getStream(fp);
-    tokenInfo input = getNextToken(buff);
+    tokenInfo *input = getNextToken(buff);
     while (!isEmpty(stack))
     {
-        if (isTerminal(stack))
+        if (isTerminal(stack->data))
         {
-            if (!strcmp(Terminals[input.id], peek(stack)))
+            if (!strcmp(Terminals[input->id], peek(stack)))
             {
                 pop(stack);
                 input = getNextToken(buff);
@@ -440,7 +451,7 @@ void parser(struct Node ***parseTable, struct Node **rules)
         }
         else
         {
-            struct Node *Rule = parseTable[getNT(peek(stack))][input.id];
+            struct Node *Rule = parseTable[getNT(peek(stack))][input->id];
             if (Rule == NULL)
             {
                 // Throw Error
@@ -463,22 +474,22 @@ void parser(struct Node ***parseTable, struct Node **rules)
         }
     }
 }
-void printParseTable(struct Node ***parseTable, char **terminals, char **nonterminals, int t_count, int nt_count)
+void printParseTable(struct Node *parseTable[number_nt][number_t])
 {
     FILE *fp = fopen("output.csv", "w");
 
-    for (int i = 0; i < t_count; i++)
+    for (int i = 0; i < number_t; i++)
     {
-        fprintf(fp, ",%s", terminals[i]);
+        fprintf(fp, ",%s", Terminals[i]);
     }
 
     fprintf(fp, "\n");
 
-    for (int row = 0; row < nt_count; row++)
+    for (int row = 0; row < number_nt; row++)
     {
-        fprintf(fp, "%s", nonterminals[row]);
+        fprintf(fp, "%s", nonTerminals[row]);
 
-        for (int col = 0; col < t_count; col++)
+        for (int col = 0; col < number_t; col++)
         {
             fprintf(fp, ",");
 
@@ -489,12 +500,12 @@ void printParseTable(struct Node ***parseTable, char **terminals, char **nonterm
             }
         }
 
-        fprintf(fp, '\n');
+        fprintf(fp, "\n");
     }
 
     fclose(fp);
 }
-*/
+
 int main()
 {
     initHashTableNT(nonTerminals);
@@ -502,7 +513,6 @@ int main()
     FILE *grammer;
     grammer = fopen("grammer.txt", "r");
     struct Node *rules[rows];
-    bool epsilon[rows];
     for (int j = 0; j < rows; j++)
     {
         char *rule = getRule(grammer);
@@ -533,23 +543,13 @@ int main()
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
     }
-    for (int i = 0; i < 71; i++)
-    {
-        printf("%s ", nts[i].nonTerminal);
-        struct Node *temp = nts[i].first;
-        while (temp != NULL)
-        {
-            printf("%s ", temp->data);
-            fflush(stdout);
-            temp = temp->next;
-        }
-        printf("\n");
-    }
 
     // First Done
     // We have computed first and follow
 
     // Fill the parsing table
-    // struct Node *parseTable[number_nt][number_t] = {NULL};
-    // fillParserTable(parseTable, rules);
+    struct Node *parseTable[number_nt][number_t] = {NULL};
+    fillParserTable(parseTable, rules);
+    printParseTable(parseTable);
+    printf("Ho gaya!");
 }
