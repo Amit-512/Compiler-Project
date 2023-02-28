@@ -231,10 +231,110 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
     }
 
     nts[get(nonTerminal)].first = header;
-    if (header == NULL)
-        return NULL;
     return header;
 }
+
+struct Node* findFollow(struct Node **rules, char *nonTerminal)
+{
+    
+    if(nts[get(nonTerminal)].follow!=NULL)
+    {
+        return nts[get(nonTerminal)].follow;
+    }
+   
+    struct Node* currNode=NULL;
+    struct Node* header=NULL;
+    for(int i=0;i<rows;i++)
+    {
+        
+        struct Node* temp=rules[i]->next;
+        while(temp!=NULL)
+        {
+            if(strcmp(temp->data,nonTerminal)==0)
+            {
+                
+                if(temp->next->data==NULL)
+                {
+                    if(strcmp(rules[i]->data,nonTerminal)==0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        struct Node* rec=findFollow(rules,rules[i]->data);
+                        if(rec==NULL)
+                        {
+                            break;
+                        }
+                        if(header==NULL)
+                        {
+                            header=initcopy(rec);
+                            currNode=header;
+                            while(currNode->next!=NULL)
+                            {
+                                currNode=currNode->next;
+                            }
+                        }
+                        else
+                        {
+                            currNode->next=nts[get(rules[i]->data)].follow;
+                            while(currNode->next!=NULL)
+                            {
+                                currNode=currNode->next;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    struct Node* next_pointer=temp->next;
+                    if(isTerminal(temp->next->data))
+                    {
+                        
+                        if(header==NULL)
+                        {
+                            header=init(temp->next->data);
+                            currNode=header;
+                        }
+                        else
+                        {
+                            push(currNode,temp->next->data);
+                        }
+                    }
+                    else
+                    {
+                        struct Node* rec=findFirst(rules,temp->next->data);
+                        if(rec==NULL)
+                        {
+                            break;
+                        }
+                        if(header==NULL)
+                        {
+                            header=initcopy(rec);
+                            currNode=header;
+                            while(currNode->next!=NULL)
+                            {
+                                currNode=currNode->next;
+                            }
+                        }
+                        else
+                        {
+                            currNode->next=nts[get(nonTerminal)].follow;
+                            while(currNode->next!=NULL)
+                            {
+                                currNode=currNode->next;
+                            }
+                        }
+                    }
+                }
+            }
+            temp=temp->next;
+        }
+    }
+    return nts[get(nonTerminal)].follow=header;
+}
+
+
 int main()
 
 {
@@ -259,6 +359,7 @@ int main()
             (currNode->next)->prev = currNode;
             currNode = currNode->next;
         }
+        free(currNode);
         rules[j] = head;
     }
     char *s = ((rules[52]->next)->next)->data;
@@ -269,20 +370,41 @@ int main()
         nts[i].hasEpsilon = false;
         nts[i].completed = false;
     }
+    for(int i=0;i<rows;i++)
+    {
+        int cnt=0;
+        struct Node* temp = rules[i];
+        while(temp!=NULL)
+        {
+            cnt++;
+            temp=temp->next;
+        }
+        printf("%d\n",cnt);
+        fflush(stdout);
+    }
     for (int i = 0; i < 71; i++)
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
     }
-    for (int i = 0; i < 71; i++)
+    
+    nts[0].follow = init("$");
+    nts[1].follow = findFollow(rules, nonTerminals[1]);
+    for (int i = 1; i < 71; i++)
     {
-        struct Node *temp = nts[i].first;
-        printf("first of %s \n", nonTerminals[i]);
+        nts[i].follow = findFollow(rules, nonTerminals[i]);
+    }
+    for(int i=0;i<71;i++)
+    {
+        struct Node* temp=nts[i].follow;
+        printf("follow of %s is \n",nts[i].nonTerminal);
         fflush(stdout);
-        while (temp != NULL)
+        while(temp!=NULL)
         {
-            printf("%s \n\n", temp->data);
+            printf("%s \n",temp->data);
             fflush(stdout);
-            temp = temp->next;
-        }
+            temp=temp->next;
+        }   
+        printf("\n");
+        fflush(stdout);
     }
 }

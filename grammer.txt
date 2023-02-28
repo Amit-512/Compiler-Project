@@ -17,7 +17,7 @@ n2 e
 dataType INTEGER
 dataType REAL
 dataType BOOLEAN
-dataType ARRAY SQBO   SQBC OF type
+dataType ARRAY SQBO range_arrays SQBC OF type
 range_arrays index_arr RANGEOP index_arr
 type INTEGER
 type REAL
@@ -97,7 +97,8 @@ factor ID n_11
 n_11 SQBO element_index_with_expressions SQBC
 n_11 e
 element_index_with_expressions sign n10
-element_index_with_expressions arrExpr new_index
+element_index_with_expressions arrExpr 
+n10 new_index
 n10 BO arrExpr BC
 arrExpr arrTerm arr_n4
 arr_n4 op1 arrTerm arr_n4
