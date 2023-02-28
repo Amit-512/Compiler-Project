@@ -180,6 +180,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                 else
                 {
                     push(currNode, temp->data);
+                    currNode = currNode->next;
                 }
             }
 
@@ -197,6 +198,12 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                     temp = temp->next;
                     if (temp == NULL)
                     {
+                        break;
+                    }
+                    if (isTerminal(temp->data))
+                    {
+                        push(currNode, temp->data);
+                        currNode = currNode->next;
                         break;
                     }
                     tempenum = get(temp->data);
@@ -261,7 +268,6 @@ int main()
         }
         rules[j] = head;
     }
-    char *s = ((rules[52]->next)->next)->data;
     // enum nonTerminals nonTerminal;
     for (int i = 0; i < 71; i++)
     {
@@ -273,5 +279,19 @@ int main()
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
     }
-    // First Done
+    for (int i = 0; i < 71; i++)
+    {
+        struct Node *temp = nts[get(nonTerminals[i])].first;
+        printf("first of %s n %d is ", nonTerminals[i], i);
+        while (temp != NULL)
+        {
+            printf("%s ", temp->data);
+            temp = temp->next;
+        }
+        if (nts[i].hasEpsilon)
+        {
+            printf(" hehe ");
+        }
+        printf("\n");
+    }
 }
