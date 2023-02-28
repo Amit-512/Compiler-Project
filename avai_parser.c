@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "lexer.h"
-#include "lexerDef.h"
+// #include "lexer.h"
+// #include "lexerDef.h"
 #define rows 142
 #define TABLE_SIZE 100
 #define MAX_PROBE 10
@@ -186,7 +186,7 @@ int getT(char *key)
 struct nonTerminalStruct nts[number_nt]; // array of stucts
 
 char *Terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
-char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n_10 ", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
+char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n10 ", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
 char *getRule(FILE *grammer)
 {
     char *buff;
@@ -342,6 +342,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
         return NULL;
     return header;
 }
+/*
 void fillParserTable(struct Node ***parseTable, struct Node **rules)
 {
     for (int i = 0; i < rows; i++)
@@ -425,7 +426,7 @@ void parser(struct Node ***parseTable, struct Node **rules)
     {
         if (isTerminal(stack))
         {
-            if (!strcmp(input.lexeme, peek(stack)))
+            if (!strcmp(Terminals[input.id], peek(stack)))
             {
                 pop(stack);
                 input = getNextToken(buff);
@@ -438,7 +439,7 @@ void parser(struct Node ***parseTable, struct Node **rules)
         }
         else
         {
-            struct Node *Rule = parseTable[getNT(peek(stack))][getT(input.lexeme)];
+            struct Node *Rule = parseTable[getNT(peek(stack))][input.id];
             if (Rule == NULL)
             {
                 // Throw Error
@@ -492,6 +493,7 @@ void printParseTable(struct Node ***parseTable, char **terminals, char **nonterm
 
     fclose(fp);
 }
+*/
 int main()
 {
     initHashTableNT(nonTerminals);
@@ -503,8 +505,8 @@ int main()
     for (int j = 0; j < rows; j++)
     {
         char *rule = getRule(grammer);
-        rule[strcspn(rule, "\n")] = 0;
         rule[strcspn(rule, "\r")] = 0;
+        rule[strcspn(rule, "\n")] = 0;
         char *currentLexicalElement = strtok(rule, " "); // it is the current lexical element
         struct Node *currNode = (struct Node *)malloc(sizeof(struct Node));
         struct Node *head = currNode;
@@ -530,10 +532,23 @@ int main()
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
     }
+    for (int i = 0; i < 71; i++)
+    {
+        printf("%s ", nts[i].nonTerminal);
+        struct Node *temp = nts[i].first;
+        while (temp != NULL)
+        {
+            printf("%s ", temp->data);
+            fflush(stdout);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
+
     // First Done
     // We have computed first and follow
 
     // Fill the parsing table
-    struct Node *parseTable[number_nt][number_t] = {NULL};
-    fillParserTable(parseTable, rules);
+    // struct Node *parseTable[number_nt][number_t] = {NULL};
+    // fillParserTable(parseTable, rules);
 }
