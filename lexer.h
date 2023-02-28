@@ -16,91 +16,7 @@ typedef struct Buffer
 
 } Buffer;
 
-// all the dfa states
-typedef enum DFAStates
-{
-    START_STATE,
-
-    FINAL_BO,
-    FINAL_BC,
-    FINAL_PLUS,
-    FINAL_MINUS,
-    FINAL_DIV,
-    FINAL_COMMA,
-    FINAL_SQBO,
-    FINAL_SQBC,
-    FINAL_SEMICOL,
-
-    STATE_TRAP,
-    STATE_NE1,
-    FINAL_NE2,
-    FINAL_MUL,
-    STATE_STAR,
-    STATE_COMMENT_START,
-    STATE_COMMENT_END1,
-    FINAL_COMMENT_END2,
-
-    STATE_RANGEOP1,
-    FINAL_RANGEOP,
-
-    STATE_EQ1,
-    FINAL_EQ2,
-
-    STATE_COLON_ASSIGNOP,
-    FINAL_COLON,
-    FINAL_ASSIGNOP,
-
-    // COULD CHANGE THIS
-    STATE_ID1,
-    STATE_ID2,
-    STATE_ID3,
-    STATE_ID4,
-    STATE_ID5,
-    STATE_ID6,
-    STATE_ID7,
-    STATE_ID8,
-    STATE_ID9,
-    STATE_ID10,
-    STATE_ID11,
-    STATE_ID12,
-    STATE_ID13,
-    STATE_ID14,
-    STATE_ID15,
-    STATE_ID16,
-    STATE_ID17,
-    STATE_ID18,
-    STATE_ID19,
-    STATE_ID20,
-    FINAL_ID,
-    STATE_LONG_ID,
-
-    STATE_NUM_RNUM1,
-    STATE_NUM_RNUM2,
-    STATE_RNUM3,
-    STATE_RNUM4,
-    STATE_RNUM1,
-    STATE_RNUM2,
-    FINAL_NUM,
-    FINAL_RNUM,
-
-    STATE_GT,
-    STATE_GTGT,
-    FINAL_GT,
-    FINAL_ENDDEF,
-    FINAL_DRIVERENDDEF,
-    FINAL_GE,
-
-    STATE_LT,
-    STATE_LTLT,
-    FINAL_LT,
-    FINAL_DRIVERDEF,
-    FINAL_DEF,
-    FINAL_LE,
-
-    FINAL_EOF
-
-} DFAStates;
-
+// used for handling error
 typedef enum DFAError
 {
     ID_TOO_LONG,
@@ -121,8 +37,84 @@ typedef enum DFAStateType
     TRAP
 } DFAStateType;
 
-// function definations
+// all the dfa states
+typedef enum DFAStates
+{
+    START_STATE,
 
+    // final states for some symbols
+    FINAL_BO,
+    FINAL_BC,
+    FINAL_PLUS,
+    FINAL_MINUS,
+    FINAL_DIV,
+    FINAL_COMMA,
+    FINAL_SQBO,
+    FINAL_SQBC,
+    FINAL_SEMICOL,
+
+    // for comment and multiply
+    STATE_TRAP,
+    STATE_NE1,
+    STATE_STAR,
+    STATE_COMMENT_START,
+    STATE_COMMENT_END1,
+    FINAL_NE2,
+    FINAL_MUL,
+    FINAL_COMMENT_END2,
+
+    // rangeop
+    STATE_RANGEOP1,
+    FINAL_RANGEOP,
+
+    // equality
+    STATE_EQ1,
+    FINAL_EQ2,
+
+    // colon and assignop
+    STATE_COLON_ASSIGNOP,
+    FINAL_COLON,
+    FINAL_ASSIGNOP,
+
+    // for identifiers and keywords
+    STATE_ID1,
+    STATE_LONG_ID,
+    FINAL_ID,
+
+    // for numbers
+    STATE_NUM_RNUM1,
+    STATE_NUM_RNUM2,
+    STATE_RNUM3,
+    STATE_RNUM4,
+    STATE_RNUM1,
+    STATE_RNUM2,
+    FINAL_NUM,
+    FINAL_RNUM,
+
+    // for greater symbol family
+    STATE_GT,
+    STATE_GTGT,
+    FINAL_DRIVERENDDEF,
+    FINAL_ENDDEF,
+    FINAL_GT,
+    FINAL_GE,
+
+    // for lesser symbol family
+    STATE_LT,
+    STATE_LTLT,
+    FINAL_DEF,
+    FINAL_LE,
+    FINAL_LT,
+    FINAL_DRIVERDEF,
+
+    // state representing end of file
+    FINAL_EOF
+
+    // temporary state for use
+
+} DFAStates;
+
+// function definations
 tokenID keywordToTokenID(char *str);
 Buffer *getStream(FILE *fp);
 int getLineNumber(Buffer *buffer);

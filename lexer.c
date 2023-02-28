@@ -6,71 +6,100 @@
 #include <string.h>
 
 // defining the size of buffer for each buffer in twin buffere
-#define buffSize 512
+#define buffSize 128
 
 // this function returns tkid of a string if it is a keyword else returns -1
 tokenID keywordToTokenID(char *str)
 {
     if (strcmp(str, "program") == 0)
         return PROGRAM;
+
     if (strcmp(str, "get_value") == 0)
         return GET_VALUE;
+
     if (strcmp(str, "print") == 0)
         return PRINT;
+
     if (strcmp(str, "use") == 0)
         return USE;
+
     if (strcmp(str, "with") == 0)
         return WITH;
+
     if (strcmp(str, "OR") == 0)
         return OR;
-    if (strcmp(str, "for") == 0)
-        return FOR;
-    if (strcmp(str, "in") == 0)
-        return IN;
-    if (strcmp(str, "switch") == 0)
-        return SWITCH;
-    if (strcmp(str, "case") == 0)
-        return CASE;
-    if (strcmp(str, "break") == 0)
-        return BREAK;
-    if (strcmp(str, "default") == 0)
-        return DEFAULT;
-    if (strcmp(str, "while") == 0)
-        return WHILE;
-    if (strcmp(str, "takes") == 0)
-        return TAKES;
-    if (strcmp(str, "input") == 0)
-        return INPUT;
-    if (strcmp(str, "returns") == 0)
-        return RETURNS;
+
     if (strcmp(str, "AND") == 0)
         return AND;
-    if (strcmp(str, "integer") == 0)
-        return INTEGER;
-    if (strcmp(str, "real") == 0)
-        return REAL;
-    if (strcmp(str, "boolean") == 0)
-        return BOOLEAN;
-    if (strcmp(str, "of") == 0)
-        return OF;
-    if (strcmp(str, "array") == 0)
-        return ARRAY;
-    if (strcmp(str, "start") == 0)
-        return START;
-    if (strcmp(str, "end") == 0)
-        return END;
-    if (strcmp(str, "declare") == 0)
-        return DECLARE;
-    if (strcmp(str, "module") == 0)
-        return MODULE;
-    if (strcmp(str, "driver") == 0)
-        return DRIVER;
-    if (strcmp(str, "parameters") == 0)
-        return PARAMETERS;
+
     if (strcmp(str, "true") == 0)
         return TRUE;
+
     if (strcmp(str, "false") == 0)
         return FALSE;
+
+    if (strcmp(str, "for") == 0)
+        return FOR;
+
+    if (strcmp(str, "in") == 0)
+        return IN;
+
+    if (strcmp(str, "while") == 0)
+        return WHILE;
+
+    if (strcmp(str, "takes") == 0)
+        return TAKES;
+
+    if (strcmp(str, "input") == 0)
+        return INPUT;
+
+    if (strcmp(str, "returns") == 0)
+        return RETURNS;
+
+    if (strcmp(str, "integer") == 0)
+        return INTEGER;
+
+    if (strcmp(str, "real") == 0)
+        return REAL;
+
+    if (strcmp(str, "boolean") == 0)
+        return BOOLEAN;
+
+    if (strcmp(str, "of") == 0)
+        return OF;
+
+    if (strcmp(str, "array") == 0)
+        return ARRAY;
+
+    if (strcmp(str, "start") == 0)
+        return START;
+
+    if (strcmp(str, "end") == 0)
+        return END;
+
+    if (strcmp(str, "declare") == 0)
+        return DECLARE;
+
+    if (strcmp(str, "module") == 0)
+        return MODULE;
+
+    if (strcmp(str, "driver") == 0)
+        return DRIVER;
+
+    if (strcmp(str, "parameters") == 0)
+        return PARAMETERS;
+
+    if (strcmp(str, "switch") == 0)
+        return SWITCH;
+
+    if (strcmp(str, "case") == 0)
+        return CASE;
+
+    if (strcmp(str, "break") == 0)
+        return BREAK;
+
+    if (strcmp(str, "default") == 0)
+        return DEFAULT;
 
     tokenID toret = (tokenID)-1;
     return toret;
@@ -118,6 +147,15 @@ Buffer *getStream(FILE *fp)
     return buffer;
 }
 
+// this function destroys the buffer by dellocating the memory occupied by it
+void eraseLexer(Buffer *buffer)
+{
+    fclose(buffer->fp);
+    free(buffer->buf1);
+    free(buffer->buf2);
+    free(buffer);
+}
+
 // this function returns the line number of a lexeme when called upon
 int getLineNumber(Buffer *buffer)
 {
@@ -130,6 +168,150 @@ int getLineNumber(Buffer *buffer)
     // }
 
     return buffer->lineNumber;
+}
+
+// function to extract a lexeme between forward and begin pointer
+char *extractLexeme(Buffer *buffer)
+{
+
+    // cases:
+    // 1. forward and begin pointer in same buffer
+    // 2. forward and begin pointer in different buffer
+    //    only possible when beign in first and forward in second
+    // 3. when forward points to eof
+
+    int i, len;
+    char *retLexeme; // will contain the lexeme to be returned
+    char *iter;      // used for iterating from begin to forward
+
+    if (*buffer->forward == EOF)
+    {
+
+        if (buffer->begin_location != buffer->forward_location) // both the pointers in the same buffer
+        {
+            int temp1, temp2;
+
+            int len = (buffer->forward - buffer->buf2 + 1) + (buffer->buf1 + buffSize - buffer->begin);
+
+            retLexeme = (char *)malloc(sizeof(char) * (len + 1));
+
+            retLexeme[len] = '\0';
+
+            iter = buffer->begin;
+            if (*iter == EOF)
+                return NULL;
+
+            for (i = 0; *iter != EOF; i++, iter++)
+            {
+                retLexeme[i] = *iter;
+            }
+
+            iter = buffer->buf2;
+            for (; i < len; i++, iter++)
+            {
+                retLexeme[i] = *iter;
+            }
+        }
+        else
+        {
+            iter = buffer->begin;
+            if (*iter == EOF)
+                return NULL;
+
+            while (*iter != EOF)
+                iter++;
+
+            retLexeme = (char *)malloc(sizeof(char) * (iter - buffer->begin + 1));
+            iter = buffer->begin;
+            for (i = 0; *iter != EOF; i++)
+            {
+                retLexeme[i] = *iter;
+                iter++;
+            }
+
+            retLexeme[i] = '\0';
+            return retLexeme;
+        }
+    }
+    else if (buffer->begin_location == BUFF_ONE && buffer->forward_location == BUFF_TWO)
+    {
+
+        len = (buffer->buf1 + buffSize - buffer->begin) + (buffer->forward - buffer->buf2 + 1);
+        retLexeme = (char *)malloc(sizeof(char) * (len + 1));
+
+        retLexeme[len] = '\0';
+
+        iter = buffer->begin;
+        for (i = 0; *iter != EOF; i++, iter++)
+        {
+            retLexeme[i] = *iter;
+        }
+
+        iter = buffer->buf2;
+        for (; i < len; i++, iter++)
+        {
+            retLexeme[i] = *iter;
+        }
+    }
+    else if ((buffer->begin_location == BUFF_ONE && buffer->forward_location == BUFF_ONE) || (buffer->begin_location == BUFF_TWO && buffer->forward_location == BUFF_TWO))
+    {
+
+        len = buffer->forward - buffer->begin + 1;
+
+        retLexeme = (char *)malloc(sizeof(char) * (len + 1));
+
+        iter = buffer->begin;
+
+        retLexeme[len] = '\0';
+
+        for (int i = 0; i < len; i++, iter++)
+        {
+            retLexeme[i] = *iter;
+        }
+    }
+    else
+    {
+        // nothing for now
+    }
+
+    return retLexeme;
+}
+
+// this function does what it says it does
+// retract the forward pointer by one position
+void retract(Buffer *buffer)
+{
+    // if forward pointer is in first buffer
+    if (buffer->forward_location == BUFF_ONE)
+    {
+        if (buffer->forward != buffer->buf1)
+        {
+            buffer->forward--;
+        }
+        else
+        {
+            // case when it points to first position in first buffer
+            printf("Retract not possible\n");
+        }
+    }
+    else
+    {
+        // if(forward is in second buffer and points to starting of the buffer)
+        if (buffer->forward != buffer->buf2)
+        {
+            // points to previous
+            buffer->forward--;
+        }
+        else
+        {
+            buffer->forward = &buffer->buf1[buffSize - 1];
+            buffer->forward_location = BUFF_ONE;
+        }
+    }
+
+    // if the forward now points to \n the reduce the line number
+    if (*buffer->forward == '\n')
+        buffer->lineNumber--;
 }
 
 // resets the beign pointer
@@ -159,7 +341,7 @@ tokenInfo *handleLexError(DFAError err, Buffer *buffer)
         break;
 
     case RANGEOP_ERR:
-        //abc.abc
+        // abc.abc
         retract(buffer);
         tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Expected '.'") + 1));
         strcpy(tk->lexeme, "Expected '.'");
@@ -180,7 +362,7 @@ tokenInfo *handleLexError(DFAError err, Buffer *buffer)
         break;
 
     case INVALID_NUM:
-    retract(buffer);
+        retract(buffer);
         tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Invalid number") + 1));
         strcpy(tk->lexeme, "Invalid number");
         break;
@@ -200,13 +382,84 @@ tokenInfo *handleLexError(DFAError err, Buffer *buffer)
     return tk;
 }
 
-// this function destroys the buffer by dellocating the memory occupied by it
-void eraseLexer(Buffer *buffer)
+// function to check if the character is digit
+int _isdigit(char c)
 {
-    fclose(buffer->fp);
-    free(buffer->buf1);
-    free(buffer->buf2);
-    free(buffer);
+    if ((int)(c - '0') >= 0 && (int)(c - '0') <= 9)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// function to check if the character is an alphabet or underscore
+int _isalphabet(char c)
+{
+    if (c >= 'a' && c <= 'z' || c == '_' || c >= 'A' || c <= 'Z')
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// function to get next char // to be used for simulating the dfa
+char getNextChar(Buffer *buffer)
+{
+    char c;
+    c = *buffer->forward; // character pointed by the forward pointer
+
+    if (c == '\n') // if it is \n increase the line number
+        buffer->lineNumber++;
+
+    if (c == EOF) // if it is eof then return eof
+        return EOF;
+
+    buffer->forward++; // increment the forward pointer
+
+    // handling cases for different characters that forward may point now
+
+    // now after incrementing if the forward is in first buffer and points to eof.
+    if (buffer->forward_location == BUFF_TWO && *buffer->forward == EOF)
+    {
+        // case when we have exhauseted our buffer
+        if (buffer->begin_location == BUFF_TWO && buffer->forward - buffer->buf2 == buffSize)
+        {
+            // make buff2 buff1 and refill buf2
+            // this shows swap
+            char *temp = buffer->buf1;
+            buffer->buf1 = buffer->buf2;
+            buffer->buf2 = temp;
+
+            // refill the second buffer
+            int siz = fread(buffer->buf2, sizeof(char), buffSize, buffer->fp);
+            buffer->forward = buffer->buf2;
+            buffer->buf2[siz] = EOF;
+
+            // begin is in buffer one now
+            buffer->begin_location = BUFF_ONE;
+        }
+        else
+        {
+            // nothing for now
+        }
+    }
+    else if (buffer->forward_location == BUFF_ONE && *buffer->forward == EOF)
+    {
+        // this signifies that forward has reached the end of buffer1 so it needs to be placed in the second buffer
+        if (buffer->forward - buffer->buf1 == buffSize)
+        {
+            buffer->forward_location = BUFF_TWO;
+            buffer->forward = buffer->buf2;
+        }
+        else
+        {
+            // nothing to be done for now
+        }
+    }
+
+    return c;
 }
 
 // this is the function which is called by parses to get the next token
@@ -243,10 +496,10 @@ tokenInfo *getNextTok(Buffer *buffer)
     DFAStateType stateType = NONFINAL;
     DFAError error;
 
-    int id_len = 0; //used to keep check of the length of identifiers
+    int id_len = 0; // used to keep check of the length of identifiers
 
     char c;
-    tokenInfo *tk = NULL; //to be returned
+    tokenInfo *tk = NULL; // to be returned
 
     while (1)
     {
@@ -356,6 +609,28 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
+        case FINAL_SQBC:
+            retract(buffer);
+            stateType = FINAL;
+
+            tk = initializeToken(SQBC, buffer);
+
+            getNextChar(buffer);
+            resetBeginPointer(buffer);
+
+            break;
+
+        case FINAL_SQBO:
+            retract(buffer);
+            stateType = FINAL;
+
+            tk = initializeToken(SQBO, buffer);
+
+            getNextChar(buffer);
+            resetBeginPointer(buffer);
+
+            break;
+
         case FINAL_BC:
             retract(buffer);
             stateType = FINAL;
@@ -378,22 +653,95 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
-        case FINAL_SQBC:
-            retract(buffer);
+        case STATE_ID1:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (isalpha(c) || isdigit(c) || c == '_')
+            {
+                id_len++;
+
+                if (id_len <= 20)
+                {
+                    dfa = STATE_ID1;
+                }
+                else
+                {
+                    dfa = STATE_LONG_ID;
+                }
+            }
+            else
+            {
+                if (c != EOF)
+                {
+                    retract(buffer);
+                }
+
+                dfa = FINAL_ID;
+            }
+
+            break;
+
+        case FINAL_ID:
             stateType = FINAL;
 
-            tk = initializeToken(SQBC, buffer);
+            retract(buffer);
+
+            tk = (tokenInfo *)malloc(sizeof(tokenInfo));
+
+            tk = initializeToken(ID, buffer);
+
+            if ((tk->id = keywordToTokenID(tk->lexeme)) == -1)
+                tk->id = ID;
 
             getNextChar(buffer);
             resetBeginPointer(buffer);
 
             break;
 
-        case FINAL_SQBO:
+        case STATE_LONG_ID:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (!(isalpha(c) || isdigit(c) || c == '_'))
+            {
+                error = ID_TOO_LONG;
+                dfa = STATE_TRAP;
+                if (c != EOF)
+                    retract(buffer);
+                resetBeginPointer(buffer);
+            }
+
+            break;
+
+        case STATE_RANGEOP1:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+            if (c != '.')
+            {
+                if (c == EOF)
+                {
+                }
+                else
+                {
+                    retract(buffer);
+                }
+
+                error = RANGEOP_ERR;
+                dfa = STATE_TRAP;
+                resetBeginPointer(buffer);
+            }
+            else
+            {
+                dfa = FINAL_RANGEOP;
+            }
+            break;
+
+        case FINAL_RANGEOP:
             retract(buffer);
             stateType = FINAL;
 
-            tk = initializeToken(SQBO, buffer);
+            tk = initializeToken(RANGEOP, buffer);
 
             getNextChar(buffer);
             resetBeginPointer(buffer);
@@ -420,40 +768,6 @@ tokenInfo *getNextTok(Buffer *buffer)
             getNextChar(buffer);
             resetBeginPointer(buffer);
 
-            break;
-
-        case FINAL_RANGEOP:
-            retract(buffer);
-            stateType = FINAL;
-
-            tk = initializeToken(RANGEOP, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case STATE_RANGEOP1:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-            if (c != '.')
-            {
-                if (c == EOF)
-                {
-                }
-                else
-                {
-                    retract(buffer);
-                }
-
-                error = RANGEOP_ERR;
-                dfa = STATE_TRAP;
-                resetBeginPointer(buffer);
-            }
-            else
-            {
-                dfa = FINAL_RANGEOP;
-            }
             break;
 
         case STATE_COLON_ASSIGNOP:
@@ -493,34 +807,6 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
-        case STATE_NE1:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (c == '=')
-                dfa = FINAL_NE2;
-            else
-            {
-                if (c != EOF)
-                    retract(buffer);
-                error = EQ_ERROR;
-                dfa = STATE_TRAP;
-                resetBeginPointer(buffer);
-            }
-
-            break;
-
-        case FINAL_NE2:
-            retract(buffer);
-            stateType = FINAL;
-
-            tk = initializeToken(NE, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
         case STATE_EQ1:
             stateType = NONFINAL;
             c = getNextChar(buffer);
@@ -549,6 +835,34 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
+        case STATE_NE1:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (c == '=')
+                dfa = FINAL_NE2;
+            else
+            {
+                if (c != EOF)
+                    retract(buffer);
+                error = EQ_ERROR;
+                dfa = STATE_TRAP;
+                resetBeginPointer(buffer);
+            }
+
+            break;
+
+        case FINAL_NE2:
+            retract(buffer);
+            stateType = FINAL;
+
+            tk = initializeToken(NE, buffer);
+
+            getNextChar(buffer);
+            resetBeginPointer(buffer);
+
+            break;
+
         case STATE_GT:
             stateType = NONFINAL;
             c = getNextChar(buffer);
@@ -566,9 +880,11 @@ tokenInfo *getNextTok(Buffer *buffer)
             {
                 dfa = FINAL_GT;
 
-                if (c == EOF){
-
-                }else{
+                if (c == EOF)
+                {
+                }
+                else
+                {
                     retract(buffer);
                 }
             }
@@ -791,67 +1107,6 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
-        case STATE_ID1:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (isalpha(c) || isdigit(c) || c == '_')
-            {
-                id_len++;
-
-                if (id_len <= 20)
-                {
-                    dfa = STATE_ID1;
-                }
-                else
-                {
-                    dfa = STATE_LONG_ID;
-                }
-            }
-            else
-            {
-                if (c != EOF)
-                {
-                    retract(buffer);
-                }
-
-                dfa = FINAL_ID;
-            }
-
-            break;
-
-        case FINAL_ID:
-            stateType = FINAL;
-
-            retract(buffer);
-
-            tk = (tokenInfo *)malloc(sizeof(tokenInfo));
-        
-            tk = initializeToken(ID, buffer);
-
-            if ((tk->id = keywordToTokenID(tk->lexeme)) == -1)
-                tk->id = ID;
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case STATE_LONG_ID:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (!(isalpha(c) || isdigit(c) || c == '_'))
-            {
-                error = ID_TOO_LONG;
-                dfa = STATE_TRAP;
-                if (c != EOF)
-                    retract(buffer);
-                resetBeginPointer(buffer);
-            }
-
-            break;
-
         case STATE_NUM_RNUM1:
             stateType = NONFINAL;
             c = getNextChar(buffer);
@@ -883,7 +1138,8 @@ tokenInfo *getNextTok(Buffer *buffer)
             {
                 error = INVALID_NUM;
                 dfa = STATE_TRAP;
-                if(c != EOF){
+                if (c != EOF)
+                {
                     retract(buffer);
                 }
                 resetBeginPointer(buffer);
@@ -924,8 +1180,8 @@ tokenInfo *getNextTok(Buffer *buffer)
             {
                 error = INVALID_NUM;
                 dfa = STATE_TRAP;
-                if(c!=EOF)
-                retract(buffer);
+                if (c != EOF)
+                    retract(buffer);
                 resetBeginPointer(buffer);
             }
             break;
@@ -985,11 +1241,6 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
-        case STATE_TRAP:
-            stateType = TRAP;
-            tk = handleLexError(error, buffer);
-            break;
-
         case FINAL_EOF:
             stateType = FINAL;
 
@@ -1001,7 +1252,13 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             break;
 
+        case STATE_TRAP:
+            stateType = TRAP;
+            tk = handleLexError(error, buffer);
+            break;
+
         default:
+            // do nothing for now
             break;
         }
 
@@ -1018,230 +1275,6 @@ tokenInfo *getNextTok(Buffer *buffer)
     }
 
     return tk;
-}
-
-// function to check if the character is digit
-int _isdigit(char c)
-{
-    if ((int)(c - '0') >= 0 && (int)(c - '0') <= 9)
-    {
-        return 1;
-    }
-
-    return 0;
-}
-
-// function to check if the character is an alphabet or underscore
-int _isalphabet(char c)
-{
-    if (c >= 'a' && c <= 'z' || c == '_' || c >= 'A' || c <= 'Z')
-    {
-        return 1;
-    }
-
-    return 0;
-}
-
-// function to get next char // to be used for simulating the dfa
-char getNextChar(Buffer *buffer)
-{
-    char c;
-    c = *buffer->forward; // character pointed by the forward pointer
-
-    if (c == '\n') // if it is \n increase the line number
-        buffer->lineNumber++;
-
-    if (c == EOF) // if it is eof then return eof
-        return EOF;
-
-    buffer->forward++; // increment the forward pointer
-
-    // handling cases for different characters that forward may point now
-
-    // now after incrementing if the forward is in first buffer and points to eof.
-    if (buffer->forward_location == BUFF_TWO && *buffer->forward == EOF)
-    {
-        // case when we have exhauseted our buffer
-        if (buffer->begin_location == BUFF_TWO && buffer->forward - buffer->buf2 == buffSize)
-        {
-            // make buff2 buff1 and refill buf2
-            // this shows swap
-            char *temp = buffer->buf1;
-            buffer->buf1 = buffer->buf2;
-            buffer->buf2 = temp;
-
-            // refill the second buffer
-            int siz = fread(buffer->buf2, sizeof(char), buffSize, buffer->fp);
-            buffer->forward = buffer->buf2;
-            buffer->buf2[siz] = EOF;
-
-            // begin is in buffer one now
-            buffer->begin_location = BUFF_ONE;
-        }
-        else
-        {
-            // nothing for now
-        }
-    }
-    else if (buffer->forward_location == BUFF_ONE && *buffer->forward == EOF)
-    {
-        // this signifies that forward has reached the end of buffer1 so it needs to be placed in the second buffer
-        if (buffer->forward - buffer->buf1 == buffSize)
-        {
-            buffer->forward_location = BUFF_TWO;
-            buffer->forward = buffer->buf2;
-        }
-        else
-        {
-            // nothing to be done for now
-        }
-    }
-
-    return c;
-}
-
-// this function does what it says it does
-// retract the forward pointer by one position
-void retract(Buffer *buffer)
-{
-    // if forward pointer is in first buffer
-    if (buffer->forward_location == BUFF_ONE)
-    {
-        if (buffer->forward != buffer->buf1)
-        {
-            buffer->forward--;
-        }
-        else
-        {
-            // case when it points to first position in first buffer
-            printf("Retract not possible\n");
-        }
-    }
-    else
-    {
-        // if(forward is in second buffer and points to starting of the buffer)
-        if (buffer->forward != buffer->buf2)
-        {
-            // points to previous
-            buffer->forward--;
-        }
-        else
-        {
-            buffer->forward = &buffer->buf1[buffSize - 1];
-            buffer->forward_location = BUFF_ONE;
-        }
-    }
-
-    // if the forward now points to \n the reduce the line number
-    if (*buffer->forward == '\n')
-        buffer->lineNumber--;
-}
-
-// function to extract a lexeme between forward and begin pointer
-char *extractLexeme(Buffer *buffer)
-{
-
-    // cases:
-    // 1. forward and begin pointer in same buffer
-    // 2. forward and begin pointer in different buffer
-    //    only possible when beign in first and forward in second
-    // 3. when forward points to eof
-
-    int i, len;
-    char *retLexeme; // will contain the lexeme to be returned
-    char *iter;      // used for iterating from begin to forward
-
-    if (*buffer->forward == EOF)
-    {
-
-        if (buffer->begin_location != buffer->forward_location) // both the pointers in the same buffer
-        {
-            int temp1, temp2;
-
-            int len = (buffer->forward - buffer->buf2 + 1) + (buffer->buf1 + buffSize - buffer->begin);
-
-            retLexeme = (char *)malloc(sizeof(char) * (len + 1));
-
-            retLexeme[len] = '\0';
-
-            iter = buffer->begin;
-            if (*iter == EOF)
-                return NULL;
-
-            for (i = 0; *iter != EOF; i++, iter++)
-            {
-                retLexeme[i] = *iter;
-            }
-
-            iter = buffer->buf2;
-            for (; i < len; i++, iter++)
-            {
-                retLexeme[i] = *iter;
-            }
-        }
-        else
-        {
-            iter = buffer->begin;
-            if (*iter == EOF)
-                return NULL;
-
-            while (*iter != EOF)
-                iter++;
-
-            retLexeme = (char *)malloc(sizeof(char) * (iter - buffer->begin + 1));
-            iter = buffer->begin;
-            for (i = 0; *iter != EOF; i++)
-            {
-                retLexeme[i] = *iter;
-                iter++;
-            }
-
-            retLexeme[i] = '\0';
-            return retLexeme;
-        }
-    }
-    else if (buffer->begin_location == BUFF_ONE && buffer->forward_location == BUFF_TWO)
-    {
-
-        len = (buffer->buf1 + buffSize - buffer->begin) + (buffer->forward - buffer->buf2 + 1);
-        retLexeme = (char *)malloc(sizeof(char) * (len + 1));
-
-        retLexeme[len] = '\0';
-
-        iter = buffer->begin;
-        for (i = 0; *iter != EOF; i++, iter++)
-        {
-            retLexeme[i] = *iter;
-        }
-
-        iter = buffer->buf2;
-        for (; i < len; i++, iter++)
-        {
-            retLexeme[i] = *iter;
-        }
-    }
-    else if ((buffer->begin_location == BUFF_ONE && buffer->forward_location == BUFF_ONE) || (buffer->begin_location == BUFF_TWO && buffer->forward_location == BUFF_TWO))
-    {
-
-        len = buffer->forward - buffer->begin + 1;
-
-        retLexeme = (char *)malloc(sizeof(char) * (len + 1));
-
-        iter = buffer->begin;
-
-        retLexeme[len] = '\0';
-
-        for (int i = 0; i < len; i++, iter++)
-        {
-            retLexeme[i] = *iter;
-        }
-    }
-    else
-    {
-        // nothing for now
-    }
-
-    return retLexeme;
 }
 
 // function to remove comments and write the source code to a new file
@@ -1330,29 +1363,3 @@ void removeComments(char *testcaseFile, char *cleanFile)
     fclose(fp1);
     fclose(fp2);
 }
-
-// int main()
-// {
-//     FILE *fp = fopen("sc.txt", "r");
-//     if (fp == NULL)
-//     {
-//         printf("file hi nahi khuli\n");
-//     }
-
-//     Buffer *buff = getStream(fp);
-
-//     tokenInfo *tk = getNextToken(buff);
-
-//     while (tk->id != TK_EOF)
-//     {
-//         if (tk->id != LEXERROR)
-//         {
-//             printf("%s line:=%d\n", tk->lexeme, tk->lineNumber);
-//         }
-//         else
-//         {
-//             printf("bhai yeh error hai dhyaan se dekh-->%s line:=%d\n", tk->lexeme, tk->lineNumber);
-//         }
-//         tk = getNextToken(buff);
-//     }
-// }
