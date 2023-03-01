@@ -15,6 +15,7 @@ typedef struct treeNode
     struct treeNode *parent;
     struct treeNode *left;
     struct treeNode *right;
+    bool isComputed;
     char *data;
 } treeNode;
 

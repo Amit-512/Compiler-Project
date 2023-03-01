@@ -21,6 +21,14 @@ treeNode *createTreeNode(char *s)
     node->left = NULL;
     node->parent = NULL;
     node->right = NULL;
+    if (isTerminal(s))
+    {
+        node->isComputed = true;
+    }
+    else
+    {
+        node->isComputed = false;
+    }
     node->data = s;
     return node;
 }
@@ -503,9 +511,8 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                             }
                             else
                             {
-                                
+
                                 currNode = appendLinkedList(currNode, temp);
-                                
                             }
 
                             currNT = currNT->next;
@@ -807,6 +814,10 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
     stack = stackPush(stack, "program");
     Buffer *buff = getStream(fp, buffSize);
     tokenInfo *input = getNextToken(buff);
+
+    treeNode *tree = createTreeNode("program");
+    treeNode *currNode = tree;
+
     while (isEmpty(stack) == 0)
     {
         if (isTerminal(peek(stack)))
@@ -846,10 +857,32 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
                     continue;
                 }
                 struct Node *tempStack = NULL;
+
+                treeNode *parentNode = currNode;
+
+                int child = 0;
+
                 while (Rule != NULL)
                 {
 
                     tempStack = stackPush(tempStack, Rule->data);
+
+                    if (child == 0)
+                    {
+                        treeNode *node = createTreeNode(Rule->data);
+                        currNode->child = node;
+                        currNode = currNode->child;
+                        currNode->parent = parentNode;
+                    }
+                    else
+                    {
+                        treeNode *node = createTreeNode(Rule->data);
+                        currNode->right = node;
+                        currNode->right->left = currNode;
+                        currNode = currNode->right;
+                        currNode->parent = parentNode;
+                    }
+                    child++;
 
                     Rule = Rule->next;
                 }
@@ -860,6 +893,37 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
                     stack = stackPush(stack, peek(tempStack));
                     pop(&tempStack);
                 }
+            }
+        }
+
+        bool allComputed = true;
+        while (currNode->left != NULL)
+        {
+            if (currNode->isComputed == false)
+            {
+                allComputed = false;
+            }
+            currNode = currNode->left;
+        }
+        while (allComputed)
+        {
+            if (currNode->parent == NULL)
+            {
+                break;
+            }
+            currNode = currNode->parent;
+            currNode->isComputed = true;
+            while (currNode->right != NULL && currNode->isComputed)
+            {
+                currNode = currNode->right;
+            }
+            if (currNode->right == NULL && currNode->isComputed)
+            {
+                continue;
+            }
+            else
+            {
+                break;
             }
         }
     }
