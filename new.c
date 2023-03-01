@@ -16,17 +16,6 @@ map *hashTableTerminals[TABLE_SIZE];
 
 // Stack Functions
 
-treeNode *createTreeNode(char *s)
-{
-    treeNode *node = (treeNode *)malloc(sizeof(treeNode));
-    node->child = NULL;
-    node->left = NULL;
-    node->parent = NULL;
-    node->right = NULL;
-    node->data = s;
-    return node;
-}
-
 char *peek(struct Node *top)
 {
     struct Node *n = top;

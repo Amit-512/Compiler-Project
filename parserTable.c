@@ -80,6 +80,7 @@ char *pop(struct Node *top)
     if (isEmpty(top))
     {
         printf("Stack Underflow\n");
+        return NULL;
     }
     else
     {
@@ -112,7 +113,7 @@ void insertNT(char *key, int value)
         i++;
         if (i > MAX_PROBE)
         {
-            printf("%s\n", key);
+
             printf("Error: 1Maximum probing limit reached\n");
             return;
         }
@@ -132,7 +133,6 @@ void insertT(char *key, int value)
         i++;
         if (i > MAX_PROBE)
         {
-            printf("%s\n", key);
             printf("Error: Maximum probing limit reached\n");
             return;
         }
@@ -157,7 +157,6 @@ int getNT(char *key)
         i++;
         if (i > MAX_PROBE)
         {
-            printf("%s ", key);
             printf("Error: Maximum probing limit reached\n");
             return 0;
         }
@@ -362,7 +361,6 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
         bool flag = false;
         int templ = getNT(lhs->data);
         struct Node *rhs = rules[i]->next;
-        printf("%s\n", rhs->data);
         if (isTerminal(rhs->data))
         {
             int tempr = getT(rhs->data);
@@ -550,6 +548,19 @@ int main()
     // Fill the parsing table
     struct Node *parseTable[number_nt][number_t] = {NULL};
     fillParserTable(parseTable, rules);
-    printParseTable(parseTable);
+    for (int i = 0; i < number_nt; i++)
+    {
+        for (int j = 0; j < number_t; j++)
+        {
+            struct Node *temp = parseTable[i][j];
+            while (temp != NULL)
+            {
+                printf("%s ", temp->data);
+                temp = temp->next;
+            }
+        }
+        printf("\n");
+    }
+    // printParseTable(parseTable);
     printf("Ho gaya!");
 }

@@ -60,6 +60,7 @@ int isFull(struct Node *top)
         return 0;
     }
 }
+
 struct Node *stackPush(struct Node *top, char *x)
 {
     if (isFull(top))
