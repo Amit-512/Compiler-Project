@@ -6,7 +6,7 @@
 #include <string.h>
 
 // defining the size of buffer for each buffer in twin buffere
-#define buffSize 128
+// #define buffSize 128
 
 // function to check if the character is digit
 int _isdigit(char c)
@@ -218,10 +218,12 @@ tokenID keywordToTokenID(char *str)
 }
 
 // this function initailises the twin buffer for extracting tokens
-Buffer *getStream(FILE *fp)
+Buffer *getStream(FILE *fp, int bufferSize)
 {
     // creating a buffer
     Buffer *buffer = (Buffer *)malloc(sizeof(Buffer));
+
+    buffer->bufferSize = bufferSize;
 
     if (fp == NULL)
     {
@@ -235,23 +237,23 @@ Buffer *getStream(FILE *fp)
     buffer->lineNumber = 1;
 
     // allocating memory to each buffer pointer
-    buffer->buf1 = (char *)malloc(sizeof(char) * (buffSize + 1));
+    buffer->buf1 = (char *)malloc(sizeof(char) * (buffer->bufferSize + 1));
 
     // int temp;
 
     // initializing buffer1
     int temp;
-    temp = fread(buffer->buf1, sizeof(char), buffSize, buffer->fp);
+    temp = fread(buffer->buf1, sizeof(char), buffer->bufferSize, buffer->fp);
     buffer->buf1[temp] = EOF;
 
     // setting both the pointers
     buffer->begin = buffer->buf1;
     buffer->forward = buffer->buf1;
 
-    buffer->buf2 = (char *)malloc(sizeof(char) * (buffSize + 1));
+    buffer->buf2 = (char *)malloc(sizeof(char) * (buffer->bufferSize + 1));
 
     // initailzing buffer2
-    temp = fread(buffer->buf2, sizeof(char), buffSize, buffer->fp);
+    temp = fread(buffer->buf2, sizeof(char), buffer->bufferSize, buffer->fp);
     buffer->buf2[temp] = EOF;
 
     // setting locations of each pointer
@@ -288,7 +290,7 @@ char *extractLexeme(Buffer *buffer)
         {
             int temp1, temp2;
 
-            int len = (buffer->forward - buffer->buf2 + 1) + (buffer->buf1 + buffSize - buffer->begin);
+            int len = (buffer->forward - buffer->buf2 + 1) + (buffer->buf1 + buffer->bufferSize - buffer->begin);
 
             retLexeme = (char *)malloc(sizeof(char) * (len + 1));
 
@@ -333,7 +335,7 @@ char *extractLexeme(Buffer *buffer)
     else if (buffer->begin_location == BUFF_ONE && buffer->forward_location == BUFF_TWO)
     {
 
-        len = (buffer->buf1 + buffSize - buffer->begin) + (buffer->forward - buffer->buf2 + 1);
+        len = (buffer->buf1 + buffer->bufferSize - buffer->begin) + (buffer->forward - buffer->buf2 + 1);
         retLexeme = (char *)malloc(sizeof(char) * (len + 1));
 
         retLexeme[len] = '\0';
@@ -404,7 +406,7 @@ void retract(Buffer *buffer)
         }
         else
         {
-            buffer->forward = &buffer->buf1[buffSize - 1];
+            buffer->forward = &buffer->buf1[buffer->bufferSize - 1];
             buffer->forward_location = BUFF_ONE;
         }
 
@@ -420,7 +422,7 @@ void retract(Buffer *buffer)
         }
         else
         {
-            buffer->forward = &buffer->buf1[buffSize - 1];
+            buffer->forward = &buffer->buf1[buffer->bufferSize - 1];
             buffer->forward_location = BUFF_ONE;
         }
 
@@ -528,7 +530,7 @@ char getNextChar(Buffer *buffer)
     if (buffer->forward_location == BUFF_TWO && *buffer->forward == EOF)
     {
         // case when we have exhauseted our buffer
-        if (buffer->begin_location == BUFF_TWO && buffer->forward - buffer->buf2 == buffSize)
+        if (buffer->begin_location == BUFF_TWO && buffer->forward - buffer->buf2 == buffer->bufferSize)
         {
             // make buff2 buff1 and refill buf2
             // this shows swap
@@ -537,7 +539,7 @@ char getNextChar(Buffer *buffer)
             buffer->buf2 = temp;
 
             // refill the second buffer
-            int siz = fread(buffer->buf2, sizeof(char), buffSize, buffer->fp);
+            int siz = fread(buffer->buf2, sizeof(char), buffer->bufferSize, buffer->fp);
             buffer->forward = buffer->buf2;
             buffer->buf2[siz] = EOF;
 
@@ -552,7 +554,7 @@ char getNextChar(Buffer *buffer)
     else if (buffer->forward_location == BUFF_ONE && *buffer->forward == EOF)
     {
         // this signifies that forward has reached the end of buffer1 so it needs to be placed in the second buffer
-        if (buffer->forward - buffer->buf1 == buffSize)
+        if (buffer->forward - buffer->buf1 == buffer->bufferSize)
         {
             buffer->forward_location = BUFF_TWO;
             buffer->forward = buffer->buf2;
@@ -1417,7 +1419,7 @@ void printAllTokens(char *fileName)
         printf("file didnt open\n");
     }
 
-    Buffer *buff = getStream(fp);
+    Buffer *buff = getStream(fp, 128);
 
     tokenInfo *tk = getNextTokenWithErrors(buff);
 

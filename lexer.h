@@ -12,6 +12,7 @@ typedef struct Buffer
     char *buf1, *buf2;
     char *begin, *forward;
     int lineNumber;
+    int bufferSize;
     BuffPointerLocation begin_location, forward_location;
 
 } Buffer;
@@ -116,7 +117,7 @@ typedef enum DFAStates
 
 // function definations
 tokenID keywordToTokenID(char *str);
-Buffer *getStream(FILE *fp);
+Buffer *getStream(FILE *fp, int bufferSize);
 int getLineNumber(Buffer *buffer);
 void resetBeginPointer(Buffer *buffer);
 tokenInfo *handleLexError(DFAError err, Buffer *buffer);
