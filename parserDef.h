@@ -1,11 +1,21 @@
 #ifndef _parserDef
 #define _parserDef
 
+
 typedef struct map
 {
     char *key;
     int value;
 } map;
+
+typedef struct treeNode
+{
+    struct treeNode *child;
+    struct treeNode *parent;
+    struct treeNode *left;
+    struct treeNode *right;
+    char *data;
+} treeNode;
 
 struct nonTerminalStruct
 {

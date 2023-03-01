@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "lexerDef.h"
+#include "lexer.h"
 #define rows 142
 #define TABLE_SIZE 100
 #define MAX_PROBE 10
@@ -12,9 +14,84 @@ typedef struct map
     char *key;
     int value;
 } map;
+struct Node
+{
+    struct Node *next;
+    char *data;
+    struct Node *prev;
+};
+struct nonTerminalStruct
+{
+    char *nonTerminal;
+    bool hasEpsilon;
+    struct Node *first;
+    struct Node *follow;
+    bool completed; // means it has completed calculation of its first
+};
 
 map *hashTableNonTerminals[TABLE_SIZE];
 map *hashTableTerminals[TABLE_SIZE];
+// Stack Functions using linked List
+char *peek(struct Node *top)
+{
+    struct Node *n = top;
+    return n->data;
+}
+int isEmpty(struct Node *top)
+{
+    if (top == NULL)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+int isFull(struct Node *top)
+{
+    struct Node *p = (struct Node *)malloc(sizeof(struct Node));
+    if (p == NULL)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+struct Node *stackPush(struct Node *top, char *x)
+{
+    if (isFull(top))
+    {
+        printf("Stack Overflow\n");
+    }
+    else
+    {
+        struct Node *n = (struct Node *)malloc(sizeof(struct Node));
+        n->data = x;
+        n->next = top;
+        top = n;
+        return top;
+    }
+}
+char *pop(struct Node *top)
+{
+    if (isEmpty(top))
+    {
+        printf("Stack Underflow\n");
+        return NULL;
+    }
+    else
+    {
+        struct Node *n = top;
+        top = (top)->next;
+        char *x;
+        strcpy(x, n->data);
+        free(n);
+        return x;
+    }
+}
 // hash function using quadratic probing
 int hash(char *key, int i)
 {
@@ -36,7 +113,8 @@ void insertNT(char *key, int value)
         i++;
         if (i > MAX_PROBE)
         {
-            printf("Error: Maximum probing limit reached\n");
+
+            printf("Error: 1Maximum probing limit reached\n");
             return;
         }
         index = hash(key, i);
@@ -107,25 +185,11 @@ int getT(char *key)
     return 0;
 }
 
-struct nonTerminalStruct
-{
-    char *nonTerminal;
-    bool hasEpsilon;
-    struct Node *first;
-    struct Node *follow;
-    bool completed; // means it has completed calculation of its first
-};
-struct Node
-{
-    struct Node *next;
-    char *data;
-    struct Node *prev;
-};
-
 struct nonTerminalStruct nts[number_nt]; // array of stucts
 
 char *Terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
-char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n_10 ", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
+
+char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n10 ", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
 char *getRule(FILE *grammer)
 {
     char *buff;
@@ -142,18 +206,18 @@ bool isEpsilon(char *s) // works
 {
     return (strcmp(s, "e") == 0) || (strcmp(s, "e\r") == 0) || (strcmp(s, "e\n") == 0);
 }
-
 struct Node *copy(struct Node *n1, struct Node *n2)
 {
-    struct Node *temp = n1;
+
     while (n2 != NULL)
     {
-        temp->next = (struct Node *)malloc(sizeof(struct Node));
-        (temp->next)->data = n2->data;
-        (temp->next)->prev = temp;
-        temp = temp->next;
+        struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
+        temp->data = n2->data;
+        n1->next = temp;
+        n1 = n1->next;
+        n2 = n2->next;
     }
-    return temp;
+    return n1;
 }
 void initHashTableNT(char **nonTerminals)
 {
@@ -176,17 +240,16 @@ struct Node *init(char *s)
     curr->data = s;
     return curr;
 }
-
 void push(struct Node *curr, char *s)
 {
     curr->next = (struct Node *)malloc(sizeof(struct Node));
     (curr->next)->data = s;
     (curr->next)->prev = curr;
 }
-struct Node *initcopy(struct Node *rec, struct Node *header)
+struct Node *initcopy(struct Node *rec)
 {
     struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-    header = temp;
+    struct Node *header = temp;
     temp->data = rec->data;
     while (rec->next != NULL)
     {
@@ -196,18 +259,16 @@ struct Node *initcopy(struct Node *rec, struct Node *header)
         temp = temp->next;
         rec = rec->next;
     }
-    return temp;
+    return header;
 }
+
 struct Node *findFirst(struct Node **rules, char *nonTerminal)
 {
+
     if (nts[getNT(nonTerminal)].first != NULL)
     {
-        printf("first of %s already calculated\n", nonTerminal);
+
         return nts[getNT(nonTerminal)].first;
-    }
-    else
-    {
-        printf("first of %s not calculated\n", nonTerminal);
     }
 
     struct Node *currNode = NULL; // first
@@ -220,7 +281,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
             int lhs = getNT(rules[i]->data);
             if (isTerminal(temp->data))
             {
-                printf("terminal %s\n", temp->data);
+
                 if (currNode == NULL)
                 {
                     header = init(temp->data);
@@ -229,28 +290,33 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                 else
                 {
                     push(currNode, temp->data);
+                    currNode = currNode->next;
                 }
             }
 
             else if (isEpsilon(temp->data))
             {
-                printf("%s has epsilon %s\n", nts[lhs].nonTerminal, temp->data);
                 nts[lhs].hasEpsilon = true;
             }
             else
             {
-                printf("non terminal %s \n", temp->data);
                 int tempenum;
                 temp = temp->prev;
                 do
                 {
+
                     temp = temp->next;
                     if (temp == NULL)
                     {
                         break;
                     }
+                    if (isTerminal(temp->data))
+                    {
+                        push(currNode, temp->data);
+                        currNode = currNode->next;
+                        break;
+                    }
                     tempenum = getNT(temp->data);
-                    printf("entering %s\n", temp->data);
                     struct Node *rec = findFirst(rules, temp->data);
                     nts[getNT(temp->data)].first = rec;
 
@@ -258,15 +324,14 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                     {
                         break;
                     }
-                    else
-                    {
-                        printf("calculated first of %s as %s\n", temp->data, rec->data);
-                    }
-                    printf("coming out\n");
                     if (currNode == NULL)
                     {
-                        printf("initcopy\n");
-                        currNode = initcopy(rec, header);
+                        header = initcopy(rec);
+                        currNode = header;
+                        while (currNode->next != NULL)
+                        {
+                            currNode = currNode->next;
+                        }
                     }
                     else
                     {
@@ -287,47 +352,9 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
         return NULL;
     return header;
 }
-int main()
+
+void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node **rules)
 {
-    printf("Hello world\n");
-    initHashTableNT(nonTerminals);
-    initHashTableT(Terminals);
-    FILE *grammer;
-    grammer = fopen("grammer.txt", "r");
-    struct Node *rules[142];
-    bool epsilon[142];
-    for (int j = 0; j < 142; j++)
-    {
-        char *rule = getRule(grammer);
-        rule[strcspn(rule, "\n")] = 0;
-        char *currentLexicalElement = strtok(rule, " "); // it is the current lexical element
-        struct Node *currNode = (struct Node *)malloc(sizeof(struct Node));
-        struct Node *head = currNode;
-        while (currentLexicalElement != NULL)
-        {
-            currNode->data = currentLexicalElement;
-            currentLexicalElement = strtok(NULL, " ");
-            currNode->next = (struct Node *)malloc(sizeof(struct Node));
-            (currNode->next)->prev = currNode;
-            currNode = currNode->next;
-        }
-        rules[j] = head;
-    }
-    for (int i = 0; i < number_nt; i++)
-    {
-        nts[i].nonTerminal = nonTerminals[i];
-        nts[i].hasEpsilon = false;
-        nts[i].completed = false;
-    }
-    for (int i = 0; i < number_nt; i++)
-    {
-        nts[i].first = findFirst(rules, nonTerminals[i]);
-    }
-    // We have computed first and follow
-
-    // Fill the parsing table
-
-    struct Node *parseTable[number_nt][number_t + 1] = {NULL};
     for (int i = 0; i < rows; i++)
     {
         struct Node *lhs = rules[i];
@@ -339,7 +366,7 @@ int main()
             int tempr = getT(rhs->data);
             parseTable[templ][tempr] = rules[i];
         }
-        if (isEpsilon(rhs->data))
+        else if (isEpsilon(rhs->data))
         {
             struct Node *follow = nts[templ].follow;
             while (follow != NULL)
@@ -391,4 +418,149 @@ int main()
             }
         }
     }
+}
+void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
+{
+    FILE *fp = fopen("sc.txt", "r");
+    if (fp == NULL)
+    {
+        printf("file hi nahi khuli hehe\n");
+        return;
+    }
+    struct Node *stack = NULL;
+    stack = stackPush(stack, "TK_EOF");
+    stack = stackPush(stack, "program");
+    Buffer *buff = getStream(fp);
+    tokenInfo *input = getNextToken(buff);
+    while (!isEmpty(stack))
+    {
+        if (isTerminal(stack->data))
+        {
+            if (!strcmp(Terminals[input->id], peek(stack)))
+            {
+                pop(stack);
+                input = getNextToken(buff);
+                continue;
+            }
+            else
+            {
+                // Throw Error
+            }
+        }
+        else
+        {
+            struct Node *Rule = parseTable[getNT(peek(stack))][input->id];
+            if (Rule == NULL)
+            {
+                // Throw Error
+            }
+            else
+            {
+                pop(stack);
+                Rule = Rule->next;
+                struct Node *tempStack = NULL;
+                while (Rule != NULL)
+                {
+                    push(tempStack, Rule->data);
+                    Rule = Rule->next;
+                }
+                while (!isEmpty(tempStack))
+                {
+                    push(stack, pop(tempStack));
+                }
+            }
+        }
+    }
+}
+void printParseTable(struct Node *parseTable[number_nt][number_t])
+{
+    FILE *fp = fopen("output.csv", "w");
+
+    for (int i = 0; i < number_t; i++)
+    {
+        fprintf(fp, ",%s", Terminals[i]);
+    }
+
+    fprintf(fp, "\n");
+
+    for (int row = 0; row < number_nt; row++)
+    {
+        fprintf(fp, "%s", nonTerminals[row]);
+
+        for (int col = 0; col < number_t; col++)
+        {
+            fprintf(fp, ",");
+
+            struct Node *curr = parseTable[row][col];
+            while (curr != NULL)
+            {
+                fprintf(fp, "%s..", curr->data);
+            }
+        }
+
+        fprintf(fp, "\n");
+    }
+
+    fclose(fp);
+}
+
+int main()
+{
+    initHashTableNT(nonTerminals);
+    initHashTableT(Terminals);
+    FILE *grammer;
+    grammer = fopen("grammer.txt", "r");
+    struct Node *rules[rows];
+    for (int j = 0; j < rows; j++)
+    {
+        char *rule = getRule(grammer);
+        rule[strcspn(rule, "\r")] = 0;
+        rule[strcspn(rule, "\n")] = 0;
+        char *currentLexicalElement = strtok(rule, " "); // it is the current lexical element
+        struct Node *currNode = (struct Node *)malloc(sizeof(struct Node));
+        struct Node *head = currNode;
+        while (currentLexicalElement != NULL)
+        {
+            currNode->data = currentLexicalElement;
+            currentLexicalElement = strtok(NULL, " ");
+            currNode->next = (struct Node *)malloc(sizeof(struct Node));
+            (currNode->next)->prev = currNode;
+            currNode = currNode->next;
+        }
+        rules[j] = head;
+    }
+    char *s = ((rules[52]->next)->next)->data;
+    // enum nonTerminals nonTerminal;
+    for (int i = 0; i < 71; i++)
+    {
+        nts[i].nonTerminal = nonTerminals[i];
+        nts[i].hasEpsilon = false;
+        nts[i].completed = false;
+    }
+    for (int i = 0; i < 71; i++)
+    {
+        nts[i].first = findFirst(rules, nonTerminals[i]);
+    }
+
+    // First Done
+    // We have computed first and follow
+
+    // Fill the parsing table
+    struct Node *parseTable[number_nt][number_t] = {NULL};
+    fillParserTable(parseTable, rules);
+    for (int i = 0; i < number_nt; i++)
+    {
+        for (int j = 0; j < number_t; j++)
+        {
+            struct Node *temp = parseTable[i][j];
+            while (temp != NULL)
+            {
+                printf("%s ", temp->data);
+                temp = temp->next;
+            }
+        }
+        printf("\n");
+    }
+    // printParseTable(parseTable);
+    printf("Ho gaya!");
 }

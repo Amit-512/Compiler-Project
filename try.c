@@ -87,7 +87,6 @@ struct Node
 struct nonTerminalStruct nts[71]; // array of stucts
 
 char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n10", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
-char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n10", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
 
 char *getRule(FILE *grammer)
 {
@@ -106,19 +105,7 @@ bool isEpsilon(char *s) // works
 {
     return (strcmp(s, "e") == 0) || (strcmp(s, "e\r") == 0) || (strcmp(s, "e\n") == 0);
 }
-void printLL(struct Node *header)
-{
-    int cnt = 0;
 
-    while (header != NULL)
-    {
-        cnt++;
-        printf("%s ", header->data);
-        header = header->next;
-    }
-
-    printf("  count = %d\n", cnt);
-}
 // appends the second arg to the end of first and return the tail pointer
 struct Node *appendLinkedList(struct Node *n1, struct Node *n2)
 {
@@ -130,18 +117,7 @@ struct Node *appendLinkedList(struct Node *n1, struct Node *n2)
         n1->next = temp;
         n1 = n1->next;
         n2 = n2->next;
-        struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-        temp->next = NULL;
-        temp->prev = NULL;
-        // printf("%s ", n2->data);
-        temp->data = n2->data;
-        temp->prev = n1;
-        n1->next = temp;
-        n1 = n1->next;
-        n2 = n2->next;
     }
-    return n1;
-
     return n1;
 }
 
@@ -160,8 +136,6 @@ struct Node *createNode(char *s)
     struct Node *curr;
     curr = (struct Node *)malloc(sizeof(struct Node));
     curr->data = s;
-    curr->next = NULL;
-    curr->prev = NULL;
     return curr;
 }
 
@@ -171,22 +145,6 @@ void push(struct Node *curr, char *s)
     curr->next = (struct Node *)malloc(sizeof(struct Node));
     (curr->next)->data = s;
     (curr->next)->prev = curr;
-    (curr->next)->next = NULL;
-}
-struct Node *initcopy(struct Node *rec)
-{
-    struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-    struct Node *header = temp;
-    temp->data = rec->data;
-    while (rec->next != NULL)
-    {
-        temp->next = (struct Node *)malloc(sizeof(struct Node));
-        (temp->next)->data = (rec->next)->data;
-        (temp->next)->prev = temp;
-        temp = temp->next;
-        rec = rec->next;
-    }
-    return header;
 }
 
 // find the first of the given non terminal
@@ -254,15 +212,7 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
                     }
                     if (currNode == NULL)
                     {
-                        header = initcopy(rec);
-                        currNode = header;
-                        while (currNode->next != NULL)
-                        {
-                            currNode = currNode->next;
-                        }
                         header = (struct Node *)malloc(sizeof(struct Node));
-                        header->next = NULL;
-                        header->prev = NULL;
                         header->data = rec->data;
                         currNode = appendLinkedList(header, rec->next);
 
@@ -288,28 +238,12 @@ struct Node *findFirst(struct Node **rules, char *nonTerminal)
     nts[get(nonTerminal)].first = header;
     if (header == NULL)
         return NULL;
-    if (header == NULL)
-        return NULL;
     return header;
-}
-
-struct Node *cloneLinkedList(struct Node *list)
-{
-    struct Node *temp = (struct Node *)malloc(sizeof(struct Node));
-    temp->data = list->data;
-    temp->prev = NULL;
-    temp->next = NULL;
-    struct Node *head = temp;
-
-    if (list->next != NULL)
-        appendLinkedList(temp, list->next);
-
-    return head;
 }
 
 struct Node *findFollow(struct Node **rules, char *nonTerminal)
 {
-    // printf("seardhing for %s--->\n", nonTerminal);
+    printf("seardhing for %s--->\n", nonTerminal);
     if (nts[get(nonTerminal)].completed)
     {
         return nts[get(nonTerminal)].follow;
@@ -324,23 +258,37 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
         struct Node *rhs = rules[i]->next; // iterator in the rhs of rules i
         struct Node *firstRhs = rhs;       // this always points to the first string of rhs
         struct Node *lhs = rules[i];       // points to the lhs node of the rule
-        // printf("searching for %s\n",nonTerminal);
+
         while (rhs != NULL)
         {
             // rules[i] points to the lhs node of the rules
             // rhs
-            // printf("for row = %d comparing this-->%s to nt\n", i, rhs->data);
+            printf("for row = %d %s\n", i, rhs->data);
 
             if (strcmp(rhs->data, nonTerminal) == 0)
             {
-                // printf("found match\n");
-                if (rhs->next == NULL)
-                {
-                    // printf("right is null\n");
-                    fflush(stdout);
 
-                    if (strcmp(lhs->data, rhs->data))
+                printf("here\n");
+
+                if (isTerminal(rhs->next->data))
+                {
+                    struct Node *temp = createNode(rhs->data);
+
+                    if (currNode == NULL)
                     {
+                        currNode = temp;
+                        header = currNode;
+                    }
+                    else
+                    {
+                        currNode = appendLinkedList(currNode, temp);
+                    }
+                }
+                else if (rhs->next == NULL)
+                {
+                    if (rhs->data != lhs->data)
+                    {
+
                         struct Node *temp = findFollow(rules, rules[i]->data);
 
                         if (currNode == NULL)
@@ -354,36 +302,15 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                         }
                     }
                 }
-                else if (isTerminal(rhs->next->data))
-                {
-                    // printf("rihgt is terminal ---> %s\n", rhs->next->data);
-                    struct Node *temp = createNode(rhs->next->data);
-
-                    if (currNode == NULL)
-                    {
-                        currNode = temp;
-                        header = currNode;
-                    }
-                    else
-                    {
-                        currNode = appendLinkedList(currNode, temp);
-                    }
-                    // printf("%s", currNode->data);
-                }
                 else
                 {
-                    // printf("found a nt\n");
                     if (nts[get(rhs->next->data)].hasEpsilon)
                     {
-                        // printf("has an eps\n");
                         struct Node *currNT = rhs->next;
 
                         while (currNT != NULL && !isTerminal(currNT->data) && nts[get(currNT->data)].hasEpsilon)
                         {
-
-                            // struct Node *temp = nts[get(currNT->data)].first;
-
-                            struct Node *temp = cloneLinkedList(nts[get(currNT->data)].first);
+                            struct Node *temp = nts[get(currNT->data)].first;
 
                             if (currNode == NULL)
                             {
@@ -392,11 +319,7 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                             }
                             else
                             {
-                                // printf("temp has %s",temp->data);
-                                // printLL(temp);
-                                // printLL(currNode);
                                 currNode = appendLinkedList(currNode, temp);
-                                // printf("pikachu");d
                             }
 
                             currNT = currNT->next;
@@ -464,6 +387,7 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                     }
                 }
             }
+
             rhs = rhs->next;
         }
     }
@@ -474,27 +398,120 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
     return header;
 }
 
-int main()
+// Remove duplicate elements
+void removeDuplicateElements(struct Node *start)
 {
-    initParser();
+    struct Node *ptr1, *ptr2, *dup;
+    ptr1 = start;
+    while (ptr1 != NULL && ptr1->next != NULL)
+    {
+        ptr2 = ptr1;
+        while (ptr2->next != NULL)
+        {
+            if (ptr1->data == ptr2->next->data)
+            {
+                dup = ptr2->next;
+                ptr2->next = ptr2->next->next;
+                free(dup);
+            }
+            else
+                ptr2 = ptr2->next;
+        }
+        ptr1 = ptr1->next;
+    }
+}
+// init function of the parser
+void initParser()
+{
+    insertNonTerminals(nonTerminals);
 
-    // for (int i = 0; i < 71; i++)
+    FILE *grammer;
+
+    grammer = fopen("grammar.txt", "r");
+
+    struct Node *rules[rows];
+
+    for (int j = 0; j < rows; j++)
+    {
+        char *rule = getRule(grammer);
+
+        rule[strcspn(rule, "\n")] = 0;
+        rule[strcspn(rule, "\r")] = 0;
+
+        char *currentLexicalElement = strtok(rule, " "); // it is the current lexical element
+        struct Node *currNode = (struct Node *)malloc(sizeof(struct Node));
+        struct Node *head = currNode;
+        while (currentLexicalElement != NULL)
+        {
+            currNode->data = currentLexicalElement;
+            currentLexicalElement = strtok(NULL, " ");
+
+            if (currentLexicalElement == NULL)
+            {
+                currNode->next = NULL;
+                break;
+            }
+
+            currNode->next = (struct Node *)malloc(sizeof(struct Node));
+            (currNode->next)->prev = currNode;
+            currNode = currNode->next;
+        }
+        rules[j] = head;
+        // free(currNode);
+    }
+    // enum nonTerminals nonTerminal;
+    for (int i = 0; i < 71; i++)
+    {
+        nts[i].nonTerminal = nonTerminals[i];
+        nts[i].hasEpsilon = false;
+        nts[i].completed = false;
+    }
+    for (int i = 0; i < 71; i++)
+    {
+        nts[i].first = findFirst(rules, nonTerminals[i]);
+    }
+
+    nts[0].follow = createNode("$");
+    for (int i = 1; i < 71; i++)
+    {
+        nts[i].follow = findFollow(rules, nonTerminals[i]);
+    }
+
+    // for (int i = 0; i < rows; i++)
     // {
-    //     struct Node *temp = nts[get(nonTerminals[i])].follow;
-
-    //     printf("first of %s n %d is ", nonTerminals[i], i);
+    //     struct Node *temp = rules[i];
 
     //     while (temp != NULL)
     //     {
     //         printf("%s ", temp->data);
     //         temp = temp->next;
     //     }
-    //     if (nts[i].hasEpsilon)
-    //     {
-    //         printf(" hehe ");
-    //     }
+
     //     printf("\n");
     // }
+}
+
+int main()
+{
+    initParser();
+
+    for (int i = 0; i < 71; i++)
+    {
+        struct Node *temp = nts[get(nonTerminals[i])].follow;
+
+        printf("first of %s n %d is ", nonTerminals[i], i);
+
+        while (temp != NULL)
+        {
+            printf("%s ", temp->data);
+            temp = temp->next;
+        }
+        if (nts[i].hasEpsilon)
+        {
+            printf(" hehe ");
+        }
+        printf("\n");
+    }
 
     // for (int i = 0; i < rows; i++)
     // {
