@@ -1408,9 +1408,9 @@ void eraseLexer(Buffer *buffer)
     free(buffer);
 }
 
-char *Terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
+char *terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
 
-void printAllTokens(char *fileName)
+void printAllTokens(char *fileName,int buffSize)
 {
     FILE *fp = fopen(fileName, "r");
 
@@ -1419,18 +1419,13 @@ void printAllTokens(char *fileName)
         printf("file didnt open\n");
     }
 
-    Buffer *buff = getStream(fp, 128);
+    Buffer *buff = getStream(fp, buffSize);
 
     tokenInfo *tk = getNextTokenWithErrors(buff);
 
     while (tk->id != TK_EOF)
     {
-        printf("%d        %s        %s\n", tk->lineNumber, tk->lexeme, Terminals[tk->id]);
+        printf("%d        %s        %s\n", tk->lineNumber, tk->lexeme, terminals[tk->id]);
         tk = getNextTokenWithErrors(buff);
     }
-}
-
-int main()
-{
-    printAllTokens("sc.txt");
 }

@@ -1,4 +1,4 @@
-program moduleDeclarations otherModules driverModule otherModules
+program moduleDeclara0tions otherModules driverModule otherModules
 moduleDeclarations moduleDeclaration moduleDeclarations
 moduleDeclarations e
 moduleDeclaration DECLARE MODULE ID SEMICOL
@@ -42,18 +42,18 @@ whichStmt lvalueIDStmt
 whichStmt lvalueARRStmt
 lvalueIDStmt ASSIGNOP expression SEMICOL
 lvalueARRStmt SQBO element_index_with_expressions SQBC ASSIGNOP expression SEMICOL
-index_arr sign_for_loop new_index
+index_arr sign new_index
 moduleReuseStmt optional USE MODULE ID WITH PARAMETERS actual_para_list SEMICOL
 optional SQBO idList SQBC ASSIGNOP
 optional e
-actual_para_list sign_for_loop list_var n_13
-n_13 COMMA sign_for_loop list_var n_13
+actual_para_list list_var n_13
+n_13 COMMA list_var
 n_13 e
 list_var NUM
 list_var RNUM
 list_var boolConst
 list_var ID n_12
-n_12 SQBO element_index_with_expressions SQBC
+n_12 SQBO element_index_with_expressions
 n_12 e
 expression arithmeticOrBooleanExpr
 expression uop
@@ -69,6 +69,7 @@ arithmeticOrBooleanExpr anyTerm n7
 n7 logicalOp anyTerm n7
 n7 e
 anyTerm arithmeticExpr n8
+anyTerm boolConst
 n8 relationalOp arithmeticExpr
 n8 e
 arithmeticExpr term n4
@@ -137,6 +138,7 @@ type REAL
 type BOOLEAN
 sign PLUS
 sign MINUS
+sign e
 idList ID n3
 n3 COMMA ID n3
 n3 e

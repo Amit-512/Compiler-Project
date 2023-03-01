@@ -7,7 +7,7 @@
 #include "parserDef.h"
 #define number_nt 71
 #define number_t 59
-#define rows 142
+#define rows 141
 #define TABLE_SIZE 10000
 #define MAX_PROBE 100
 
@@ -15,6 +15,17 @@ map *hashTableNonTerminals[TABLE_SIZE];
 map *hashTableTerminals[TABLE_SIZE];
 
 // Stack Functions
+
+treeNode *createTreeNode(char *s)
+{
+    treeNode *node = (treeNode *)malloc(sizeof(treeNode));
+    node->child = NULL;
+    node->left = NULL;
+    node->parent = NULL;
+    node->right = NULL;
+    node->data = s;
+    return node;
+}
 
 char *peek(struct Node *top)
 {
@@ -130,7 +141,9 @@ void insertT(char *key, int value)
     hashTableTerminals[index] = new;
 }
 // get the value associated with the given key from the hash table
-int getNT(char *key)
+
+// insert a key-value pair into the hash table
+void insert(char *key, int value)
 {
     int i = 0;
     int index = hash(key, i);
@@ -634,7 +647,7 @@ void calculateFirstSet(struct Node **rules)
         nts[i].first = findFirst(rules, nonTerminals[i]);
         nts[i].first = removeDuplicatesFromLL(nts[i].first);
 
-        struct Node *temp = nts[i].first;
+        // struct Node *temp = nts[i].first;
         // printf("first of %d %d %s ------->", i, nts[i].hasEpsilon, nonTerminals[i]);
         // while (temp != NULL)
         // {
@@ -751,7 +764,8 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
         }
     }
 }
-void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
+
+void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules,int buffSize)
 {
     FILE *fp = fopen("sc.txt", "r");
     if (fp == NULL)
@@ -762,7 +776,7 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
     struct Node *stack = NULL;
     stack = stackPush(stack, "TK_EOF");
     stack = stackPush(stack, "program");
-    Buffer *buff = getStream(fp);
+    Buffer *buff = getStream(fp,buffSize);
     tokenInfo *input = getNextToken(buff);
     while (isEmpty(stack) == 0)
     {
@@ -824,7 +838,7 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
 
     printf("Input source code is syntactically correct..........\n\n");
 }
-void initParser()
+void initParser(int buffSize)
 {
     insertNonTerminals(nonTerminals);
     insertTerminals(Terminals);
@@ -851,11 +865,6 @@ void initParser()
     struct Node *parseTable[number_nt][number_t] = {NULL};
     // Filling Parse Table
     fillParserTable(parseTable, rules);
-    // printParseTable(parseTable);
-    parser(parseTable, rules);
-}
-
-int main()
-{
-    initParser();
+    printParseTable(parseTable);
+    parser(parseTable, rules,buffSize);
 }

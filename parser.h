@@ -1,5 +1,8 @@
-#ifdef _parser
+#ifndef _parser
 #define _parser
+
+#define number_nt 74
+#define number_t 59
 
 int hash(char *key, int i);
 void insertNT(char *key, int value);

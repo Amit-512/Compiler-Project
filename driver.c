@@ -5,20 +5,22 @@
 // #include "parser.h"
 #include "parserDef.h"
 
-void runLexer()
+void runLexer(char *fileName, int buffSize)
 {
+    printAllTokens(fileName, buffSize);
 }
 
-void runCompleteCode()
+void runCompleteCode(int buffSize)
 {
+    initParser(buffSize);
 }
 
 void printCommentFreeCode(char *filename)
 {
-    removeComments(filename,"dummy.txt");
+    removeComments(filename, "dummy.txt");
 }
 
-void calculateRunTime()
+void calculateRunTime(int buffSize)
 {
     clock_t start_time, end_time;
 
@@ -26,7 +28,7 @@ void calculateRunTime()
 
     start_time = clock();
 
-    runCompleteCode();
+    runCompleteCode(buffSize);
 
     end_time = clock();
 
@@ -37,11 +39,15 @@ void calculateRunTime()
     printf("Code execution completed!\n\n");
     printf("Total CPU time: %d\n", total_CPU_time);
     printf("Total CPU time in seconds: %d\n", total_CPU_time_in_seconds);
-
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
+    if (argc != 3)
+    {
+        printf("Command Line instruction incorrect\n");
+        return 0;
+    }
     printf("Hey there!\nWelcome\n\n");
 
     printf("(a) Both lexer and syntax analysis module implemented\n(b) First and Follow set automated\n(c) Filling of Parse Table automated\n");
@@ -68,7 +74,7 @@ int main(int argc, char** argv)
             break;
 
         case 1:
-            runLexer();
+            runLexer(argv[0], (argv[2] - '0'));
             break;
 
         case 2:
@@ -76,11 +82,11 @@ int main(int argc, char** argv)
             break;
 
         case 3:
-            runCompleteCode();
+            runCompleteCode((argv[2] - '0'));
             break;
 
         case 4:
-            calculateRunTime();
+            calculateRunTime((argv[2]-'0'));
             break;
         }
 
