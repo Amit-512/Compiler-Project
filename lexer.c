@@ -8,6 +8,117 @@
 // defining the size of buffer for each buffer in twin buffere
 #define buffSize 128
 
+// function to check if the character is digit
+int _isdigit(char c)
+{
+    if ((int)(c - '0') >= 0 && (int)(c - '0') <= 9)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// function to check if the character is an alphabet or underscore
+int _isalphabet(char c)
+{
+    if (c >= 'a' && c <= 'z' || c == '_' || c >= 'A' || c <= 'Z')
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
+// function to remove comments and write the source code to a new file
+void removeComments(char *testcaseFile, char *cleanFile)
+{
+    // if told to keep the error
+    FILE *fp1, *fp2;
+
+    fp1 = fopen(testcaseFile, "r");
+
+    if (fp1 == NULL)
+    {
+        printf("Cannot open file %s \n", testcaseFile);
+        exit(0);
+    }
+
+    fp2 = fopen(cleanFile, "w");
+
+    if (fp1 == NULL)
+    {
+        printf("Cannot open file %s \n", cleanFile);
+        exit(0);
+    }
+
+    char c = fgetc(fp1);
+
+    while (c != EOF)
+    {
+        if (c == '*')
+        {
+            c = fgetc(fp1);
+
+            if (c == '*')
+            {
+                c = fgetc(fp1);
+
+                while (1)
+                {
+                    while (c != '*' && c != EOF)
+                    {
+                        if (c == '\n')
+                            fputc(c, fp2);
+
+                        c = fgetc(fp1);
+                    }
+
+                    if (c == '*')
+                    {
+                        c = fgetc(fp1);
+                        if (c == '*')
+                        {
+                            // comment done
+                            c = fgetc(fp1);
+                            break;
+                        }
+                        else
+                        {
+                            // comment still going on
+                            // do nothing for now
+                        }
+                    }
+
+                    if (c == EOF)
+                    {
+                        // file has ended, comment end not found
+                        // need to handle the case when file ended but comment didnt
+
+                        printf("Comment error in the source code\n");
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                fputc('*', fp2);
+            }
+        }
+
+        if (c == EOF)
+        { // useful when one * comes just before eof
+            break;
+        }
+
+        fputc(c, fp2);
+        c = fgetc(fp1);
+    }
+
+    fclose(fp1);
+    fclose(fp2);
+}
+
 // this function returns tkid of a string if it is a keyword else returns -1
 tokenID keywordToTokenID(char *str)
 {
@@ -102,6 +213,7 @@ tokenID keywordToTokenID(char *str)
         return DEFAULT;
 
     tokenID toret = (tokenID)-1;
+
     return toret;
 }
 
@@ -111,21 +223,21 @@ Buffer *getStream(FILE *fp)
     // creating a buffer
     Buffer *buffer = (Buffer *)malloc(sizeof(Buffer));
 
-    // initializing the file pointer
-    buffer->fp = fp;
-
     if (fp == NULL)
     {
         return NULL;
     }
 
+    // initializing the file pointer
+    buffer->fp = fp;
+
+    // set the line number to 1 initailly
+    buffer->lineNumber = 1;
+
     // allocating memory to each buffer pointer
     buffer->buf1 = (char *)malloc(sizeof(char) * (buffSize + 1));
-    buffer->buf2 = (char *)malloc(sizeof(char) * (buffSize + 1));
 
     // int temp;
-
-    buffer->lineNumber = 1; // set the line number to 1 initailly
 
     // initializing buffer1
     int temp;
@@ -136,13 +248,15 @@ Buffer *getStream(FILE *fp)
     buffer->begin = buffer->buf1;
     buffer->forward = buffer->buf1;
 
-    // setting locations of each pointer
-    buffer->begin_location = BUFF_ONE;
-    buffer->forward_location = BUFF_ONE;
+    buffer->buf2 = (char *)malloc(sizeof(char) * (buffSize + 1));
 
     // initailzing buffer2
     temp = fread(buffer->buf2, sizeof(char), buffSize, buffer->fp);
     buffer->buf2[temp] = EOF;
+
+    // setting locations of each pointer
+    buffer->begin_location = BUFF_ONE;
+    buffer->forward_location = BUFF_ONE;
 
     return buffer;
 }
@@ -159,14 +273,6 @@ void eraseLexer(Buffer *buffer)
 // this function returns the line number of a lexeme when called upon
 int getLineNumber(Buffer *buffer)
 {
-    // if(buffer->forward == buffer->buf2 && buffer->buf1[buffSize-1] == '\n'){
-    //     return buffer->lineNumber-1;
-    // }
-
-    // if(*(buffer->forward - 1) == '\n' && *(buffer->forward) != EOF){
-    //     return buffer->lineNumber-1;
-    // }
-
     return buffer->lineNumber;
 }
 
@@ -293,6 +399,9 @@ void retract(Buffer *buffer)
             // case when it points to first position in first buffer
             printf("Retract not possible\n");
         }
+
+        if (*buffer->forward == '\n')
+            buffer->lineNumber--;
     }
     else
     {
@@ -307,16 +416,19 @@ void retract(Buffer *buffer)
             buffer->forward = &buffer->buf1[buffSize - 1];
             buffer->forward_location = BUFF_ONE;
         }
+
+        if (*buffer->forward == '\n')
+            buffer->lineNumber--;
     }
 
     // if the forward now points to \n the reduce the line number
-    if (*buffer->forward == '\n')
-        buffer->lineNumber--;
 }
 
 // resets the beign pointer
 void resetBeginPointer(Buffer *buffer)
 {
+    char *temp; // not useful for now; everything works fine
+
     if (buffer->begin_location != buffer->forward_location)
     {
         buffer->begin_location = BUFF_TWO;
@@ -329,79 +441,60 @@ void resetBeginPointer(Buffer *buffer)
 tokenInfo *handleLexError(DFAError err, Buffer *buffer)
 {
     // retract(buffer);
+
+    // initializing the token
+
     tokenInfo *tk = (tokenInfo *)malloc(sizeof(tokenInfo));
     tk->id = LEXERROR;
     tk->lineNumber = getLineNumber(buffer);
+    int len = 0;
 
-    switch (err)
+    if (err == COMMENT_ERROR)
     {
-    case UNKOWN_SYMBOL:
-        tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Unknown Symbol") + 1));
-        strcpy(tk->lexeme, "Unknown Symbol");
-        break;
-
-    case RANGEOP_ERR:
-        // abc.abc
+        len = strlen("Comment not valid");
+        tk->lexeme = (char *)malloc(sizeof(char) * (len + 1));
+        strcpy(tk->lexeme, "Comment not valid");
+    }
+    else if (err == INVALID_NUM)
+    {
+        len = strlen("Number not valid");
         retract(buffer);
-        tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Expected '.'") + 1));
-        strcpy(tk->lexeme, "Expected '.'");
-        break;
-
-    case EQ_ERROR:
-        // !abc
+        tk->lexeme = (char *)malloc(sizeof(char) * (len + 1));
+        strcpy(tk->lexeme, "Number not valid");
+    }
+    else if (err == ID_TOO_LONG)
+    {
+        len = strlen("Too long identifier");
         retract(buffer);
-        tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Expected '='") + 1));
+        tk->lexeme = (char *)malloc(sizeof(char) * (len + 1));
+        strcpy(tk->lexeme, "Too long identifier");
+    }
+    else if (err == EQ_ERROR)
+    {
+        len = strlen("Expected = operator");
+        retract(buffer);
+        tk->lexeme = (char *)malloc(sizeof(char) * (len + 1));
         strcpy(tk->lexeme, "Expected '='");
-        break;
-
-    case ID_TOO_LONG:
+    }
+    else if (err == RANGEOP_ERR)
+    {
+        // abc.abc
+        len = strlen("Expected '.'");
         retract(buffer);
-        tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Identifier longer than 20 characters") + 1));
-        strcpy(tk->lexeme, "Identifier longer than 20 characters");
-
-        break;
-
-    case INVALID_NUM:
-        retract(buffer);
-        tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Invalid number") + 1));
-        strcpy(tk->lexeme, "Invalid number");
-        break;
-
-    case COMMENT_ERROR:
-        tk->lexeme = (char *)malloc(sizeof(char) * (strlen("Invalid comment") + 1));
-        strcpy(tk->lexeme, "Invalid comment");
-        break;
-
-    default:
-        break;
+        tk->lexeme = (char *)malloc(sizeof(char) * (len + 1));
+        strcpy(tk->lexeme, "Expected '.'");
+    }
+    else if (err == UNKOWN_SYMBOL)
+    {
+        len = strlen("Unknown Symbol");
+        tk->lexeme = (char *)malloc(sizeof(char) * (len + 1));
+        strcpy(tk->lexeme, "Unknown Symbol");
     }
 
     getNextChar(buffer);
     resetBeginPointer(buffer);
 
     return tk;
-}
-
-// function to check if the character is digit
-int _isdigit(char c)
-{
-    if ((int)(c - '0') >= 0 && (int)(c - '0') <= 9)
-    {
-        return 1;
-    }
-
-    return 0;
-}
-
-// function to check if the character is an alphabet or underscore
-int _isalphabet(char c)
-{
-    if (c >= 'a' && c <= 'z' || c == '_' || c >= 'A' || c <= 'Z')
-    {
-        return 1;
-    }
-
-    return 0;
 }
 
 // function to get next char // to be used for simulating the dfa
@@ -462,6 +555,22 @@ char getNextChar(Buffer *buffer)
     return c;
 }
 
+// function to get tokens along with along with errors
+tokenInfo *getNextTokenWithErrors(Buffer *buffer)
+{
+    // loop will keep on running until a valid token is found
+    while (1)
+    {
+        tokenInfo *tok = getNextTok(buffer);
+
+        // is it is a comment token then do not pass it to lexer
+        if (tok->id != COMMENT)
+        {
+            return tok;
+        }
+    }
+}
+
 // this is the function which is called by parses to get the next token
 tokenInfo *getNextToken(Buffer *buffer)
 {
@@ -471,7 +580,7 @@ tokenInfo *getNextToken(Buffer *buffer)
         tokenInfo *tok = getNextTok(buffer);
 
         // is it is a comment token then do not pass it to lexer
-        if (tok->id != COMMENT)
+        if (tok->id != COMMENT && tok->id != LEXERROR)
         {
             return tok;
         }
@@ -1275,91 +1384,4 @@ tokenInfo *getNextTok(Buffer *buffer)
     }
 
     return tk;
-}
-
-// function to remove comments and write the source code to a new file
-void removeComments(char *testcaseFile, char *cleanFile)
-{
-    // if told to keep the error
-    FILE *fp1, *fp2;
-
-    fp1 = fopen(testcaseFile, "r");
-
-    if (fp1 == NULL)
-    {
-        printf("Cannot open file %s \n", testcaseFile);
-        exit(0);
-    }
-
-    fp2 = fopen(cleanFile, "w");
-
-    if (fp1 == NULL)
-    {
-        printf("Cannot open file %s \n", cleanFile);
-        exit(0);
-    }
-
-    char c = fgetc(fp1);
-
-    while (c != EOF)
-    {
-        if (c == '*')
-        {
-            c = fgetc(fp1);
-
-            if (c == '*')
-            {
-                c = fgetc(fp1);
-
-                while (1)
-                {
-                    while (c != '*' && c != EOF)
-                    {
-                        if (c == '\n')
-                            fputc(c, fp2);
-
-                        c = fgetc(fp1);
-                    }
-
-                    if (c == '*')
-                    {
-                        c = fgetc(fp1);
-                        if (c == '*')
-                        {
-                            // comment done
-                            c = fgetc(fp1);
-                            break;
-                        }
-                        else
-                        {
-                            // comment still going on
-                            // do nothing for now
-                        }
-                    }
-
-                    if (c == EOF)
-                    {
-                        // file has ended, comment end not found
-                        // need to handle the case when file ended but comment didnt
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                fputc('*', fp2);
-            }
-        }
-
-        if (c == EOF)
-        { // useful when one * comes just before eof
-            break;
-        }
-
-        fputc(c, fp2);
-        c = fgetc(fp1);
-    }
-
-    fclose(fp1);
-    fclose(fp2);
 }

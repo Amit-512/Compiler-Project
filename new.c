@@ -7,7 +7,7 @@
 #include "parserDef.h"
 #define number_nt 71
 #define number_t 59
-#define rows 141
+#define rows 142
 #define TABLE_SIZE 10000
 #define MAX_PROBE 100
 
@@ -851,7 +851,7 @@ void initParser()
     struct Node *parseTable[number_nt][number_t] = {NULL};
     // Filling Parse Table
     fillParserTable(parseTable, rules);
-    printParseTable(parseTable);
+    // printParseTable(parseTable);
     parser(parseTable, rules);
 }
 

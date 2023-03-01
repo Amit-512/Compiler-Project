@@ -10,10 +10,10 @@ typedef struct map
 
 typedef struct treeNode
 {
-    treeNode *child;
-    treeNode *parent;
-    treeNode *left;
-    treeNode *right;
+    struct treeNode *child;
+    struct treeNode *parent;
+    struct treeNode *left;
+    struct treeNode *right;
     char *data;
 } treeNode;
 
