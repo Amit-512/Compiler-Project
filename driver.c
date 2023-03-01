@@ -3,7 +3,7 @@
 #include "lexer.h"
 #include <time.h>
 // #include "parser.h"
-// #include "parserDef.h"
+#include "parserDef.h"
 
 void runLexer()
 {
@@ -13,9 +13,9 @@ void runCompleteCode()
 {
 }
 
-void printCommentFreeCode()
+void printCommentFreeCode(char *filename)
 {
-    removeComments();
+    removeComments(filename,"dummy.txt");
 }
 
 void calculateRunTime()
@@ -40,7 +40,7 @@ void calculateRunTime()
 
 }
 
-int main()
+int main(int argc, char** argv)
 {
     printf("Hey there!\nWelcome\n\n");
 
@@ -72,7 +72,7 @@ int main()
             break;
 
         case 2:
-            printCommentFreeCode();
+            printCommentFreeCode(argv[0]);
             break;
 
         case 3:
