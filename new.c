@@ -635,14 +635,14 @@ void calculateFirstSet(struct Node **rules)
         nts[i].first = removeDuplicatesFromLL(nts[i].first);
 
         struct Node *temp = nts[i].first;
-        printf("first of %d %d %s ------->", i, nts[i].hasEpsilon, nonTerminals[i]);
-        while (temp != NULL)
-        {
-            printf("%s,", temp->data);
-            temp = temp->next;
-        }
+        // printf("first of %d %d %s ------->", i, nts[i].hasEpsilon, nonTerminals[i]);
+        // while (temp != NULL)
+        // {
+        //     printf("%s,", temp->data);
+        //     temp = temp->next;
+        // }
 
-        printf("\n");
+        // printf("\n");
     }
 }
 void printParseTable(struct Node *parseTable[number_nt][number_t])
