@@ -503,11 +503,9 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                             }
                             else
                             {
-                                // printf("temp has %s",temp->data);
-                                // printLL(temp);
-                                // printLL(currNode);
+                                
                                 currNode = appendLinkedList(currNode, temp);
-                                // printf("pikachu");d
+                                
                             }
 
                             currNT = currNT->next;
@@ -532,7 +530,7 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                         }
                         else if (isTerminal(currNT->data))
                         {
-                            struct Node *temp = createNode(rhs->data);
+                            struct Node *temp = createNode(currNT->data);
 
                             if (currNode == NULL)
                             {
@@ -546,7 +544,7 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                         }
                         else
                         {
-                            struct Node *temp = nts[getNT(currNT->data)].first;
+                            struct Node *temp = cloneLinkedList(nts[getNT(currNT->data)].first);
 
                             if (currNode == NULL)
                             {
@@ -561,7 +559,7 @@ struct Node *findFollow(struct Node **rules, char *nonTerminal)
                     }
                     else
                     {
-                        struct Node *temp = nts[getNT(rhs->next->data)].first;
+                        struct Node *temp = cloneLinkedList(nts[getNT(rhs->next->data)].first);
 
                         if (currNode == NULL)
                         {
@@ -628,14 +626,14 @@ void calculateFollowSet(struct Node **rules)
         nts[i].follow = findFollow(rules, nonTerminals[i]);
 
         nts[i].follow = removeDuplicatesFromLL(nts[i].follow);
-        struct Node *temp = nts[i].follow;
-        printf("follow of %d hehe %s ------->", i, nonTerminals[i]);
-        while (temp != NULL)
-        {
-            // printf("%s,", temp->data);
-            temp = temp->next;
-        }
-        printf("\n");
+        // struct Node *temp = nts[i].follow;
+        // printf("follow of %d hehe %s ------->", i, nonTerminals[i]);
+        // while (temp != NULL)
+        // {
+        //     // printf("%s,", temp->data);
+        //     temp = temp->next;
+        // }
+        // printf("\n");
     }
 }
 
@@ -770,9 +768,10 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
                 struct Node *temp = nts[getNT(rhs->data)].first;
                 while (temp != NULL)
                 {
-                if(strcmp(lhs->data,"arithmeticExpr")==0){
-                    printf("Helllooo %s\n\n\n\n\n\n",temp->data);
-                }
+                    if (strcmp(lhs->data, "arithmeticExpr") == 0)
+                    {
+                        printf("Helllooo %s\n\n\n\n\n\n", temp->data);
+                    }
                     if (parseTable[templ][getT(temp->data)] != NULL)
                     {
                         printf("Grammar is not LL(1) %s %s", nonTerminals[templ], temp->data);
@@ -890,6 +889,32 @@ void initParser(int buffSize)
     nts[0].follow = createNode("TK_EOF");
     nts[0].completed = true;
     calculateFollowSet(rules);
+
+    for (int i = 0; i < number_nt; i++)
+    {
+        struct Node *temp = nts[i].first;
+        printf("first of %d %d %s ------->", i, nts[i].hasEpsilon, nonTerminals[i]);
+        while (temp != NULL)
+        {
+            printf("%s,", temp->data);
+            temp = temp->next;
+        }
+
+        printf("\n");
+    }
+
+    for (int i = 0; i < number_nt; i++)
+    {
+        struct Node *temp = nts[i].follow;
+        printf("follow of %d %d %s ------->", i, nts[i].hasEpsilon, nonTerminals[i]);
+        while (temp != NULL)
+        {
+            printf("%s,", temp->data);
+            temp = temp->next;
+        }
+
+        printf("\n");
+    }
 
     struct Node *parseTable[number_nt][number_t] = {NULL};
     // Filling Parse Table
