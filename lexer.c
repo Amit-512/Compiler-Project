@@ -261,15 +261,6 @@ Buffer *getStream(FILE *fp)
     return buffer;
 }
 
-// this function destroys the buffer by dellocating the memory occupied by it
-void eraseLexer(Buffer *buffer)
-{
-    fclose(buffer->fp);
-    free(buffer->buf1);
-    free(buffer->buf2);
-    free(buffer);
-}
-
 // this function returns the line number of a lexeme when called upon
 int getLineNumber(Buffer *buffer)
 {
@@ -403,9 +394,25 @@ void retract(Buffer *buffer)
         if (*buffer->forward == '\n')
             buffer->lineNumber--;
     }
-    else
+    else if (buffer->forward_location == BUFF_TWO)
     {
         // if(forward is in second buffer and points to starting of the buffer)
+        if (buffer->forward != buffer->buf2)
+        {
+            // points to previous
+            buffer->forward--;
+        }
+        else
+        {
+            buffer->forward = &buffer->buf1[buffSize - 1];
+            buffer->forward_location = BUFF_ONE;
+        }
+
+        if (*buffer->forward == '\n')
+            buffer->lineNumber--;
+    }
+    else
+    {
         if (buffer->forward != buffer->buf2)
         {
             // points to previous
@@ -445,8 +452,9 @@ tokenInfo *handleLexError(DFAError err, Buffer *buffer)
     // initializing the token
 
     tokenInfo *tk = (tokenInfo *)malloc(sizeof(tokenInfo));
-    tk->id = LEXERROR;
     tk->lineNumber = getLineNumber(buffer);
+    tk->id = LEXERROR;
+
     int len = 0;
 
     if (err == COMMENT_ERROR)
@@ -501,7 +509,10 @@ tokenInfo *handleLexError(DFAError err, Buffer *buffer)
 char getNextChar(Buffer *buffer)
 {
     char c;
+
     c = *buffer->forward; // character pointed by the forward pointer
+
+    char ctemp = c; // not useful for now
 
     if (c == '\n') // if it is \n increase the line number
         buffer->lineNumber++;
@@ -1384,4 +1395,40 @@ tokenInfo *getNextTok(Buffer *buffer)
     }
 
     return tk;
+}
+
+// this function destroys the buffer by dellocating the memory occupied by it
+void eraseLexer(Buffer *buffer)
+{
+    fclose(buffer->fp);
+    free(buffer->buf1);
+    free(buffer->buf2);
+    free(buffer);
+}
+
+char *Terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
+
+void printAllTokens(char *fileName)
+{
+    FILE *fp = fopen(fileName, "r");
+
+    if (fp == NULL)
+    {
+        printf("file didnt open\n");
+    }
+
+    Buffer *buff = getStream(fp);
+
+    tokenInfo *tk = getNextTokenWithErrors(buff);
+
+    while (tk->id != TK_EOF)
+    {
+        printf("%d        %s        %s\n", tk->lineNumber, tk->lexeme, Terminals[tk->id]);
+        tk = getNextTokenWithErrors(buff);
+    }
+}
+
+int main()
+{
+    printAllTokens("sc.txt");
 }
