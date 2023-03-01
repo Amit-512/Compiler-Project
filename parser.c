@@ -142,6 +142,27 @@ void insertT(char *key, int value)
 }
 // get the value associated with the given key from the hash table
 int getNT(char *key)
+#include "parserDef.h"
+#define rows 141
+#define TABLE_SIZE 10000
+#define MAX_PROBE 100
+
+map *hashtable[TABLE_SIZE];
+
+// hash function using quadratic probing
+
+int hash(char *key, int i)
+{
+    int hashval = 0;
+    for (int j = 0; j < strlen(key); j++)
+    {
+        hashval += key[j];
+    }
+    return (hashval + i * i) % TABLE_SIZE;
+}
+
+// insert a key-value pair into the hash table
+void insert(char *key, int value)
 {
     int i = 0;
     int index = hash(key, i);
@@ -761,6 +782,46 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
             }
         }
     }
+
+    calculateFirstSet(rules);
+    caluculateFollowSet(rules);
+
+    nts[0].follow = createNode("$");
+    nts[0].completed = true;
+}
+
+int main()
+{
+    initParser();
+
+    // for (int i = 0; i < 71; i++)
+    // {
+    //     struct Node *temp = nts[get(nonTerminals[i])].follow;
+
+    //     printf("first of %s n %d is ", nonTerminals[i], i);
+
+    //     while (temp != NULL)
+    //     {
+    //         printf("%s ", temp->data);
+    //         temp = temp->next;
+    //     }
+    //     if (nts[i].hasEpsilon)
+    //     {
+    //         printf(" hehe ");
+    //     }
+    //     printf("\n");
+    // }
+
+    // for (int i = 0; i < rows; i++)
+    // {
+    //     struct Node *temp = rules[i];
+
+    //     while (temp != NULL)
+    //     {
+    //         printf("%s", temp->data);
+    //         temp = temp->next;
+    //     }
+    // }
 }
 void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
 {
