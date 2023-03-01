@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 #include "lexerDef.h"
 #include "lexer.h"
 #include "parserDef.h"
-#define number_nt 71
-#define number_t 59
-#define rows 141
+#include "parser.h"
+#define rows 142
 #define TABLE_SIZE 10000
 #define MAX_PROBE 100
 
@@ -143,26 +141,7 @@ void insertT(char *key, int value)
 // get the value associated with the given key from the hash table
 
 // insert a key-value pair into the hash table
-void insert(char *key, int value)
-{
-    int i = 0;
-    int index = hash(key, i);
-    while (hashTableNonTerminals[index] != NULL)
-    {
-        if (strcmp(hashTableNonTerminals[index]->key, key) == 0)
-        {
-            return hashTableNonTerminals[index]->value;
-        }
-        i++;
-        if (i > MAX_PROBE)
-        {
-            printf("Error: Maximum probing limit reached\n");
-            return 0;
-        }
-        index = hash(key, i);
-    }
-    return 0;
-}
+
 int getT(char *key)
 {
     int i = 0;
@@ -183,10 +162,30 @@ int getT(char *key)
     }
     return 0;
 }
+int getNT(char *key)
+{
+    int i = 0;
+    int index = hash(key, i);
+    while (hashTableNonTerminals[index] != NULL)
+    {
+        if (strcmp(hashTableNonTerminals[index]->key, key) == 0)
+        {
+            return hashTableNonTerminals[index]->value;
+        }
+        i++;
+        if (i > MAX_PROBE)
+        {
+            printf("Error: Maximum probing limit reached\n");
+            return 0;
+        }
+        index = hash(key, i);
+    }
+    return 0;
+}
 
-struct nonTerminalStruct nts[71]; // array of stucts
+struct nonTerminalStruct nts[number_nt]; // array of stucts
 
-char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "id_num_rnum", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "u", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n10", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop"};
+char *nonTerminals[] = {"program", "moduleDeclarations", "moduleDeclaration", "otherModules", "driverModule", "module", "ret", "input_plist", "n1", "output_plist", "n2", "dataType", "range_arrays", "type", "moduleDef", "statements", "statement", "ioStmt", "boolConst", "var_print", "p1", "simpleStmt", "assignmentStmt", "whichStmt", "lvalueIDStmt", "lvalueARRStmt", "index_arr", "new_index", "sign", "moduleReuseStmt", "optional", "idList", "n3", "actual_para_list", "expression", "uop", "new_NT", "var_id_num", "unary_op", "arithmeticOrBooleanExpr", "n7", "anyTerm", "n8", "arithmeticExpr", "n4", "term", "n5", "factor", "n_11", "element_index_with_expressions", "n_10", "arrExpr", "arr_n4", "arrTerm", "arr_n5", "arrFactor", "op1", "logicalOp", "relationalOp", "declareStmt", "conditionalStmt", "caseStmts", "n9", "value", "default", "iterativeStmt", "range_for_loop", "index_for_loop", "new_index_for_loop", "sign_for_loop", "n_12", "n_13", "list_var", "op2"};
 char *Terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
 
 char *getRule(FILE *grammar)
@@ -241,7 +240,7 @@ struct Node *appendLinkedList(struct Node *n1, struct Node *n2)
 // inserts all the non terminals in the hash table
 void insertNonTerminals(char **nonTerminals)
 {
-    for (int i = 0; i < 71; i++)
+    for (int i = 0; i < number_nt; i++)
     {
         insertNT(nonTerminals[i], i);
     }
@@ -622,27 +621,27 @@ void makeLLOfGrammar(FILE *grammar, struct Node **rules)
     }
 }
 
-void caluculateFollowSet(struct Node **rules)
+void calculateFollowSet(struct Node **rules)
 {
-    for (int i = 1; i < 71; i++)
+    for (int i = 1; i < number_nt; i++)
     {
         nts[i].follow = findFollow(rules, nonTerminals[i]);
 
         nts[i].follow = removeDuplicatesFromLL(nts[i].follow);
         struct Node *temp = nts[i].follow;
-        // printf("follow of %d hehe %s ------->", i, nonTerminals[i]);
-        // while (temp != NULL)
-        // {
-        //     // printf("%s,", temp->data);
-        //     temp = temp->next;
-        // }
-        // printf("\n");
+        printf("follow of %d hehe %s ------->", i, nonTerminals[i]);
+        while (temp != NULL)
+        {
+            // printf("%s,", temp->data);
+            temp = temp->next;
+        }
+        printf("\n");
     }
 }
 
 void calculateFirstSet(struct Node **rules)
 {
-    for (int i = 0; i < 71; i++)
+    for (int i = 0; i < number_nt; i++)
     {
         nts[i].first = findFirst(rules, nonTerminals[i]);
         nts[i].first = removeDuplicatesFromLL(nts[i].first);
@@ -695,13 +694,17 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
     for (int i = 0; i < rows; i++)
     {
         struct Node *lhs = rules[i];
-        bool flag = false;
         int templ = getNT(lhs->data);
         struct Node *rhs = rules[i]->next;
         // printf("%s\n", rhs->data);
         if (isTerminal(rhs->data))
         {
             int tempr = getT(rhs->data);
+            if (parseTable[templ][tempr] != NULL)
+            {
+                printf("Grammar is not LL(1) %s %s", nonTerminals[templ], Terminals[tempr]);
+                exit(0);
+            }
             parseTable[templ][tempr] = rules[i];
         }
         else if (isEpsilon(rhs->data))
@@ -710,6 +713,11 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
             while (follow != NULL)
             {
                 int tempr = getT(follow->data);
+                if (parseTable[templ][tempr] != NULL)
+                {
+                    printf("Grammar is not LL(1) %s %s", nonTerminals[templ], Terminals[tempr]);
+                    exit(0);
+                }
                 parseTable[templ][tempr] = rules[i];
                 follow = follow->next;
             }
@@ -725,6 +733,11 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
 
                 while (temp != NULL)
                 {
+                    if (parseTable[templ][getT(temp->data)] != NULL)
+                    {
+                        printf("Grammar is not LL(1) %s %s", nonTerminals[templ], temp->data);
+                        exit(0);
+                    }
                     parseTable[templ][getT(temp->data)] = rules[i];
                     temp = temp->next;
                 }
@@ -743,6 +756,11 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
 
                 while (temp != NULL)
                 {
+                    if (parseTable[templ][getT(temp->data)] != NULL)
+                    {
+                        printf("Grammar is not LL(1) %s %s", nonTerminals[templ], temp->data);
+                        exit(0);
+                    }
                     parseTable[templ][getT(temp->data)] = rules[i];
                     temp = temp->next;
                 }
@@ -750,72 +768,45 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
             else if (!isTerminal(rhs->data))
             {
                 struct Node *temp = nts[getNT(rhs->data)].first;
-
                 while (temp != NULL)
                 {
+                if(strcmp(lhs->data,"arithmeticExpr")==0){
+                    printf("Helllooo %s\n\n\n\n\n\n",temp->data);
+                }
+                    if (parseTable[templ][getT(temp->data)] != NULL)
+                    {
+                        printf("Grammar is not LL(1) %s %s", nonTerminals[templ], temp->data);
+                        exit(0);
+                    }
                     parseTable[templ][getT(temp->data)] = rules[i];
                     temp = temp->next;
                 }
             }
             else
             {
+                if (parseTable[templ][getT(rhs->data)] != NULL)
+                {
+                    printf("Grammar is not LL(1) %s %s", nonTerminals[templ], rhs->data);
+                    exit(0);
+                }
                 parseTable[templ][getT(rhs->data)] = rules[i];
             }
         }
     }
-
-    calculateFirstSet(rules);
-    caluculateFollowSet(rules);
-
-    nts[0].follow = createNode("$");
-    nts[0].completed = true;
 }
 
-int main()
-{
-    initParser();
-
-    // for (int i = 0; i < 71; i++)
-    // {
-    //     struct Node *temp = nts[get(nonTerminals[i])].follow;
-
-    //     printf("first of %s n %d is ", nonTerminals[i], i);
-
-    //     while (temp != NULL)
-    //     {
-    //         printf("%s ", temp->data);
-    //         temp = temp->next;
-    //     }
-    //     if (nts[i].hasEpsilon)
-    //     {
-    //         printf(" hehe ");
-    //     }
-    //     printf("\n");
-    // }
-
-    // for (int i = 0; i < rows; i++)
-    // {
-    //     struct Node *temp = rules[i];
-
-    //     while (temp != NULL)
-    //     {
-    //         printf("%s", temp->data);
-    //         temp = temp->next;
-    //     }
-    // }
-}
-void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
+void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, int buffSize)
 {
     FILE *fp = fopen("sc.txt", "r");
     if (fp == NULL)
     {
-        printf("file hi nahi khuli hehe\n");
+        printf("File Not Found\n");
         return;
     }
     struct Node *stack = NULL;
     stack = stackPush(stack, "TK_EOF");
     stack = stackPush(stack, "program");
-    Buffer *buff = getStream(fp);
+    Buffer *buff = getStream(fp, buffSize);
     tokenInfo *input = getNextToken(buff);
     while (isEmpty(stack) == 0)
     {
@@ -831,19 +822,18 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
             }
             else
             {
-                printf("Kya kar raha hai 1 bhai? %d %s %s\n", input->lineNumber, peek(stack), Terminals[input->id]);
+                printf("Error! Terminals mismatch %d %s %s\n", input->lineNumber, peek(stack), Terminals[input->id]);
                 exit(0);
             }
         }
         else if (!isEpsilon(peek(stack)))
         {
             printf("found a non terminal on stack top--> %s\n", peek(stack));
-            printf("Stack has 2 %s\n", peek(stack));
-            printf("Input is 2 %s\n", Terminals[input->id]);
+            printf("Input is %s\n", Terminals[input->id]);
             struct Node *Rule = parseTable[getNT(peek(stack))][input->id];
             if (Rule == NULL)
             {
-                printf("Kya kar raha hai 2 bhai? %d %s %s\n", input->lineNumber, peek(stack), Terminals[input->id]);
+                printf("Rule not Found %d %s %s\n", input->lineNumber, peek(stack), Terminals[input->id]);
                 exit(0);
             }
             else
@@ -877,7 +867,7 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules)
 
     printf("Input source code is syntactically correct..........\n\n");
 }
-void initParser()
+void initParser(int buffSize)
 {
     insertNonTerminals(nonTerminals);
     insertTerminals(Terminals);
@@ -890,7 +880,7 @@ void initParser()
     makeLLOfGrammar(grammar, rules);
 
     // filling nts
-    for (int i = 0; i < 71; i++)
+    for (int i = 0; i < number_nt; i++)
     {
         nts[i].nonTerminal = nonTerminals[i];
         nts[i].hasEpsilon = false;
@@ -899,16 +889,16 @@ void initParser()
     calculateFirstSet(rules);
     nts[0].follow = createNode("TK_EOF");
     nts[0].completed = true;
-    caluculateFollowSet(rules);
+    calculateFollowSet(rules);
 
     struct Node *parseTable[number_nt][number_t] = {NULL};
     // Filling Parse Table
     fillParserTable(parseTable, rules);
     printParseTable(parseTable);
-    parser(parseTable, rules);
+    parser(parseTable, rules, buffSize);
 }
 
 int main()
 {
-    initParser();
+    initParser(128);
 }

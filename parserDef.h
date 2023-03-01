@@ -1,6 +1,7 @@
 #ifndef _parserDef
 #define _parserDef
 
+#include <stdbool.h>
 
 typedef struct map
 {
