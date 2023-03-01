@@ -597,6 +597,10 @@ tokenInfo *getNextToken(Buffer *buffer)
         {
             return tok;
         }
+        else if (tok->id == LEXERROR)
+        {
+            printf("LEXICAL ERROR ON LINE %d : %s\n", tok->lineNumber, tok->lexeme);
+        }
     }
 }
 
@@ -609,6 +613,13 @@ tokenInfo *initializeToken(tokenID tk_id, Buffer *buffer)
     ret->lineNumber = getLineNumber(buffer);
 
     return ret;
+}
+
+// resets the begin pointer for next token input
+void cleanUpForBeginPointer(Buffer *buffer)
+{
+    getNextChar(buffer);
+    resetBeginPointer(buffer);
 }
 
 // this function simulates a dfa to get the tokens.
@@ -704,8 +715,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(PLUS, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -715,8 +725,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(MINUS, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -726,8 +735,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(DIV, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -737,8 +745,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(SQBC, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -748,8 +755,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(SQBO, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -759,8 +765,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(BC, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -770,8 +775,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(BO, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -816,8 +820,7 @@ tokenInfo *getNextTok(Buffer *buffer)
             if ((tk->id = keywordToTokenID(tk->lexeme)) == -1)
                 tk->id = ID;
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -865,8 +868,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(RANGEOP, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -876,8 +878,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(SEMICOL, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -887,8 +888,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(COMMA, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -913,8 +913,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(ASSIGNOP, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -924,8 +923,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(COLON, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -952,8 +950,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(EQ, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -980,252 +977,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(NE, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case STATE_GT:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (c == '=')
-            {
-                dfa = FINAL_GE;
-            }
-            else if (c == '>')
-            {
-
-                dfa = STATE_GTGT;
-            }
-            else
-            {
-                dfa = FINAL_GT;
-
-                if (c == EOF)
-                {
-                }
-                else
-                {
-                    retract(buffer);
-                }
-            }
-
-            break;
-
-        case STATE_GTGT:
-            c = getNextChar(buffer);
-            stateType = NONFINAL;
-
-            if (c == '>')
-                dfa = FINAL_DRIVERENDDEF;
-            else
-            {
-                dfa = FINAL_ENDDEF;
-
-                if (c != EOF)
-                    retract(buffer);
-            }
-
-            break;
-
-        case FINAL_DRIVERENDDEF:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(DRIVERENDDEF, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_ENDDEF:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(ENDDEF, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_GE:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(GE, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_GT:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(GT, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case STATE_LT:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-            if (c == '=')
-                dfa = FINAL_LE;
-            else if (c == '<')
-                dfa = STATE_LTLT;
-            else
-            {
-                dfa = FINAL_LT;
-                if (c != EOF)
-                    retract(buffer);
-            }
-
-            break;
-
-        case STATE_LTLT:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-            if (c == '<')
-                dfa = FINAL_DRIVERDEF;
-            else
-            {
-                if (c != EOF)
-                    retract(buffer);
-                dfa = FINAL_DEF;
-            }
-
-            break;
-
-        case FINAL_DRIVERDEF:
-            retract(buffer);
-
-            stateType = FINAL;
-            tk = initializeToken(DRIVERDEF, buffer);
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_DEF:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(DEF, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_LT:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(LT, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_LE:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(LE, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case STATE_STAR:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (c != '*')
-            {
-                if (c != EOF)
-                    retract(buffer);
-                dfa = FINAL_MUL;
-            }
-            else
-            {
-                dfa = STATE_COMMENT_START;
-            }
-
-            break;
-
-        case STATE_COMMENT_START:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (c == '*')
-                dfa = STATE_COMMENT_END1;
-            else if (c == EOF)
-            {
-                error = COMMENT_ERROR;
-                dfa = STATE_TRAP;
-            }
-            else
-                resetBeginPointer(buffer);
-
-            break;
-
-        case STATE_COMMENT_END1:
-            stateType = NONFINAL;
-            c = getNextChar(buffer);
-
-            if (c == EOF)
-            {
-                error = COMMENT_ERROR;
-                dfa = STATE_TRAP;
-            }
-            else if (c == '*')
-                dfa = FINAL_COMMENT_END2;
-            else
-            {
-                dfa = STATE_COMMENT_START;
-                resetBeginPointer(buffer);
-            }
-
-            break;
-
-        case FINAL_COMMENT_END2:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(COMMENT, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
-
-            break;
-
-        case FINAL_MUL:
-            retract(buffer);
-
-            stateType = FINAL;
-
-            tk = initializeToken(MUL, buffer);
-
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -1278,7 +1030,8 @@ tokenInfo *getNextTok(Buffer *buffer)
                 dfa = STATE_RNUM2;
             }
             else if (isdigit(c))
-                ;
+            {
+            }
             else
             {
                 if (c != EOF)
@@ -1346,8 +1099,7 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(NUM, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -1358,8 +1110,241 @@ tokenInfo *getNextTok(Buffer *buffer)
 
             tk = initializeToken(RNUM, buffer);
 
-            getNextChar(buffer);
-            resetBeginPointer(buffer);
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case STATE_GT:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (c == '=')
+            {
+                dfa = FINAL_GE;
+            }
+            else if (c == '>')
+            {
+
+                dfa = STATE_GTGT;
+            }
+            else
+            {
+                dfa = FINAL_GT;
+
+                if (c == EOF)
+                {
+                }
+                else
+                {
+                    retract(buffer);
+                }
+            }
+
+            break;
+
+        case STATE_GTGT:
+            c = getNextChar(buffer);
+            stateType = NONFINAL;
+
+            if (c == '>')
+                dfa = FINAL_DRIVERENDDEF;
+            else
+            {
+                dfa = FINAL_ENDDEF;
+
+                if (c != EOF)
+                    retract(buffer);
+            }
+
+            break;
+
+        case FINAL_DRIVERENDDEF:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(DRIVERENDDEF, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_ENDDEF:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(ENDDEF, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_GE:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(GE, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_GT:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(GT, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case STATE_LT:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+            if (c == '=')
+                dfa = FINAL_LE;
+            else if (c == '<')
+                dfa = STATE_LTLT;
+            else
+            {
+                dfa = FINAL_LT;
+                if (c != EOF)
+                    retract(buffer);
+            }
+
+            break;
+
+        case STATE_LTLT:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+            if (c == '<')
+                dfa = FINAL_DRIVERDEF;
+            else
+            {
+                if (c != EOF)
+                    retract(buffer);
+                dfa = FINAL_DEF;
+            }
+
+            break;
+
+        case FINAL_DRIVERDEF:
+            retract(buffer);
+
+            stateType = FINAL;
+            tk = initializeToken(DRIVERDEF, buffer);
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_DEF:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(DEF, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_LT:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(LT, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_LE:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(LE, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case STATE_STAR:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (c != '*')
+            {
+                if (c != EOF)
+                    retract(buffer);
+                dfa = FINAL_MUL;
+            }
+            else
+            {
+                dfa = STATE_COMMENT_START;
+            }
+
+            break;
+
+        case STATE_COMMENT_START:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (c == '*')
+                dfa = STATE_COMMENT_END1;
+            else if (c == EOF)
+            {
+                error = COMMENT_ERROR;
+                dfa = STATE_TRAP;
+            }
+            else
+                resetBeginPointer(buffer);
+
+            break;
+
+        case STATE_COMMENT_END1:
+            stateType = NONFINAL;
+            c = getNextChar(buffer);
+
+            if (c == EOF)
+            {
+                error = COMMENT_ERROR;
+                dfa = STATE_TRAP;
+            }
+            else if (c == '*')
+                dfa = FINAL_COMMENT_END2;
+            else
+            {
+                dfa = STATE_COMMENT_START;
+                resetBeginPointer(buffer);
+            }
+
+            break;
+
+        case FINAL_COMMENT_END2:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(COMMENT, buffer);
+
+            cleanUpForBeginPointer(buffer);
+
+            break;
+
+        case FINAL_MUL:
+            retract(buffer);
+
+            stateType = FINAL;
+
+            tk = initializeToken(MUL, buffer);
+
+            cleanUpForBeginPointer(buffer);
 
             break;
 
@@ -1410,7 +1395,7 @@ void eraseLexer(Buffer *buffer)
 
 char *terminals[] = {"ID", "TRUE", "FALSE", "COMMENT", "AND", "OR", "INTEGER", "REAL", "BOOLEAN", "OF", "ARRAY", "START", "END", "DECLARE", "MODULE", "DRIVER", "PROGRAM", "GET_VALUE", "PRINT", "USE", "WITH", "PARAMETERS", "TAKES", "INPUT", "RETURNS", "FOR", "IN", "SWITCH", "CASE", "BREAK", "DEFAULT", "WHILE", "NUM", "RNUM", "PLUS", "MINUS", "MUL", "DIV", "LT", "LE", "GE", "GT", "EQ", "NE", "DEF", "ENDDEF", "DRIVERDEF", "DRIVERENDDEF", "COLON", "RANGEOP", "SEMICOL", "COMMA", "ASSIGNOP", "SQBO", "SQBC", "BO", "BC", "LEXERROR", "TK_EOF"};
 
-void printAllTokens(char *fileName,int buffSize)
+void printAllTokens(char *fileName, int buffSize)
 {
     FILE *fp = fopen(fileName, "r");
 

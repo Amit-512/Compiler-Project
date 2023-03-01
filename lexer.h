@@ -18,5 +18,5 @@ char *extractLexeme(Buffer *buffer);
 void removeComments(char *testcaseFile, char *cleanFile);
 tokenInfo *getNextTokenWithErrors(Buffer *buffer);
 void printAllTokens(char *fileName,int buffSize);
-
+void cleanUpForBeginPointer(Buffer *buffer);
 #endif
