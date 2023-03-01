@@ -141,25 +141,6 @@ void insertT(char *key, int value)
     hashTableTerminals[index] = new;
 }
 // get the value associated with the given key from the hash table
-int getNT(char *key)
-#include "parserDef.h"
-#define rows 141
-#define TABLE_SIZE 10000
-#define MAX_PROBE 100
-
-map *hashtable[TABLE_SIZE];
-
-// hash function using quadratic probing
-
-int hash(char *key, int i)
-{
-    int hashval = 0;
-    for (int j = 0; j < strlen(key); j++)
-    {
-        hashval += key[j];
-    }
-    return (hashval + i * i) % TABLE_SIZE;
-}
 
 // insert a key-value pair into the hash table
 void insert(char *key, int value)
