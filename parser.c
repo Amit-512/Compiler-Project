@@ -21,7 +21,7 @@ treeNode *createTreeNode(char *s)
     node->left = NULL;
     node->parent = NULL;
     node->right = NULL;
-    if (isTerminal(s))
+    if (isTerminal(s) || isEpsilon(s))
     {
         node->isComputed = true;
     }
@@ -32,7 +32,23 @@ treeNode *createTreeNode(char *s)
     node->data = s;
     return node;
 }
-
+void printTree(treeNode *Tree)
+{
+    if (Tree->child != NULL)
+    {
+        printTree(Tree->child);
+    }
+    printf(" %s ----> ", Tree->data);
+    if (Tree->child != NULL)
+    {
+        treeNode *right_siblings = Tree->child->right;
+        while (right_siblings != NULL)
+        {
+            printTree(right_siblings);
+            right_siblings = right_siblings->right;
+        }
+    }
+}
 char *peek(struct Node *top)
 {
     struct Node *n = top;
@@ -827,6 +843,13 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
             {
                 printf("found a match --> %s\n", peek(stack));
                 pop(&stack);
+                while(currNode->right==NULL&&currNode->parent!=NULL)
+                {
+                    currNode=currNode->parent;
+                    
+                }
+                if(currNode->right!=NULL)
+                currNode=currNode->right;
                 input = getNextToken(buff);
                 continue;
             }
@@ -854,6 +877,15 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
                 Rule = Rule->next;
                 if (isEpsilon(Rule->data))
                 {
+                    treeNode* node = createTreeNode(Rule->data);
+                    currNode->child=node;
+                    node->parent = currNode;
+                    while(currNode->right==NULL&&currNode->parent!=NULL)
+                    {
+                        currNode=currNode->parent;
+                    }
+                    if(currNode->right!=NULL)
+                    currNode=currNode->right;
                     continue;
                 }
                 struct Node *tempStack = NULL;
@@ -878,7 +910,7 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
                     {
                         treeNode *node = createTreeNode(Rule->data);
                         currNode->right = node;
-                        currNode->right->left = currNode;
+                        node->left = currNode;
                         currNode = currNode->right;
                         currNode->parent = parentNode;
                     }
@@ -886,6 +918,7 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
 
                     Rule = Rule->next;
                 }
+                currNode = currNode->parent->child;
                 // printf("%s\n", peek(tempStack));
                 while (isEmpty(tempStack) == 0)
                 {
@@ -894,41 +927,16 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
                     pop(&tempStack);
                 }
             }
+            
         }
+    
 
-        bool allComputed = true;
-        while (currNode->left != NULL)
-        {
-            if (currNode->isComputed == false)
-            {
-                allComputed = false;
-            }
-            currNode = currNode->left;
-        }
-        while (allComputed)
-        {
-            if (currNode->parent == NULL)
-            {
-                break;
-            }
-            currNode = currNode->parent;
-            currNode->isComputed = true;
-            while (currNode->right != NULL && currNode->isComputed)
-            {
-                currNode = currNode->right;
-            }
-            if (currNode->right == NULL && currNode->isComputed)
-            {
-                continue;
-            }
-            else
-            {
-                break;
-            }
-        }
+       
     }
 
     printf("Input source code is syntactically correct..........\n\n");
+    
+    printTree(tree);
 }
 void initParser(int buffSize)
 {
@@ -990,4 +998,46 @@ void initParser(int buffSize)
 int main()
 {
     initParser(128);
+
 }
+//  bool allComputed = true;
+//         while (currNode->left != NULL)
+//         {
+//             if (currNode->isComputed == false)
+//             {
+//                 allComputed = false;
+//             }
+//             currNode = currNode->left;
+//         }
+//         if (currNode->isComputed == false)
+//         {
+//             allComputed = false;
+//         }
+//         if (!allComputed)
+//         {
+//             while (currNode->isComputed == true)
+//             {
+//                 currNode = currNode->right;
+//             }
+//         }
+//         while (allComputed)
+//         {
+//             if (currNode->parent == NULL)
+//             {
+//                 break;
+//             }
+//             currNode = currNode->parent;
+//             currNode->isComputed = true;
+//             while (currNode->right != NULL && currNode->isComputed)
+//             {
+//                 currNode = currNode->right;
+//             }
+//             if (currNode->right == NULL && currNode->isComputed)
+//             {
+//                 continue;
+//             }
+//             else
+//             {
+//                 break;
+//             }
+        // }
