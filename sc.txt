@@ -1,63 +1,36 @@
-declare module readArr;
-**the following function computes the sum of first n elements of the array**
-<<module arraySum>>
-takes input[list:array[1..15] of    real, n :integer];                       	**ERROR 1**
-returns  [sum:real];
-start
-	declare index:integer;
-	declare t:boolean;
-	sum :=0.0;								**ERROR 2**
-	for(index in  1..15)							**ERROR 3**
-	start
-		t:= index<=n;
-		switch(t)
-		start
-			case true: print(list[index]);
-				   sum:=sum + list[index];			**ERROR 4**
-				   break;
-			case false: print(sum);
-				    print(index);
-				    **prints the values of sum and index  15-n times**
-				    break;
-		end
-		** no need to increment the value of index as it will be taken care by the semantic rules associated with for construct, but an increment statement does not make its syntax incorrect**
-	end
-	print(sum);								**ERROR 5**
-end
+** This testcase demonstrates correctness of module structure with declaration and simple statements**
 <<<driver program>>>
 start
-	declare A:array[1...15] of real;					**ERROR 6**
-	declare k:integer;
-	declare s:real;
-	get_value(k);
-	use module readArr while parameters A,k;				**ERROR 7**
-	[s]:= use module arraySum with parameters A,k;
-	s:= s <= n >= k;							**ERROR 8**
-	print(s)								**ERROR 9**
+	declare v_1_2_3:integer;
+	get_value(v_1_2_3);
+	declare result_:integer;
+	[result_]:=use module square with parameters 1.2, A[k], -2, - j, -A[v], _1_2_3; 
+        ** Modify rule for <actual_para_list>**
+	print(result);
 end
 
-**The following module reads k  values one by one**
-** the array elements are populated with the read values**
-**The array variable is not returned as the translation will**
-**use the same locations for array elements**
-
-<<module readArr>>
-takes input [arr1:array[1..15] of real,k:integer];
+<<module square>>
+takes input [x:integer];
+returns [value:integer];
 start
-	declare tempvar:real23;							**ERROR 10**
-	declare i:integer;
-	i:=1;
-	while(i<= k)
-	start
-		get_value(tempvar);
-		arr1[i]:=for;							**ERROR 11**
-		print(list[P*Q+index]);						**ERROR 12**
-		i:=i+1;
-		** the semantics of while needs an increment and will be taken care of at the second phase**
-	end
+	value:= x*x;
 end
 
-** List all errors with line numbers in the following format
-Line 53: Error in the input as expected token is an identifier 
+**notice that this test case does not declare the module before the driver module, still it is syntactically correct as moduleDeclarations is optional. Testing whether a module is declared before its use is a matter of semantic analysis**
 
-or so on.**
+** test the correctness of all lexemes and parse tree created
+and print the following message on successful compilation on the console
+      " Input source code is syntactically correct.........."
+**
+**
+Modification for the rule for actual parameters list
+
+<actual_para_list> --> <actual_para_list> COMMA <K> | <K> | <sign> <K>
+<K> --> NUM | RNUM | <boolConstt> | ID <N_11> 
+<N_11> --> SQBO <element_index_with_expression> SQBC | epsilon
+
+Resolve the left recursion in the above rules. 
+
+**
+**make sure to produce only relevant output of your compiler code...
+Also remove all unnecessary printf statements and make the code more professional before submitting**

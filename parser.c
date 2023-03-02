@@ -32,19 +32,19 @@ treeNode *createTreeNode(char *s)
     node->data = s;
     return node;
 }
-void printTree(treeNode *Tree)
+void printTree(FILE *fileName,treeNode *Tree)
 {
     if (Tree->child != NULL)
     {
-        printTree(Tree->child);
+        printTree(fileName,Tree->child);
     }
-    printf(" %s ----> ", Tree->data);
+    fprintf(fileName," %s ----> ", Tree->data);
     if (Tree->child != NULL)
     {
         treeNode *right_siblings = Tree->child->right;
         while (right_siblings != NULL)
         {
-            printTree(right_siblings);
+            printTree(fileName,right_siblings);
             right_siblings = right_siblings->right;
         }
     }
@@ -817,12 +817,16 @@ void fillParserTable(struct Node *parseTable[number_nt][number_t], struct Node *
     }
 }
 
-void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, int buffSize)
+void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, int buffSize,char* fileName)
 {
+    FILE *treeFile = fopen(fileName,"w");
+    if(treeFile==NULL){
+        printf("Parser Tree File Not Created");
+    }
     FILE *fp = fopen("sc.txt", "r");
     if (fp == NULL)
     {
-        printf("File Not Found\n");
+        printf("Source Code File Not Found\n");
         return;
     }
     struct Node *stack = NULL;
@@ -936,9 +940,9 @@ void parser(struct Node *parseTable[number_nt][number_t], struct Node **rules, i
 
     printf("Input source code is syntactically correct..........\n\n");
     
-    printTree(tree);
+    printTree(treeFile,tree);
 }
-void initParser(int buffSize)
+void initParser(int buffSize,char* fileName)
 {
     insertNonTerminals(nonTerminals);
     insertTerminals(Terminals);
@@ -992,12 +996,12 @@ void initParser(int buffSize)
     // Filling Parse Table
     fillParserTable(parseTable, rules);
     printParseTable(parseTable);
-    parser(parseTable, rules, buffSize);
+    parser(parseTable, rules, buffSize,fileName);
 }
 
 int main()
 {
-    initParser(128);
+    initParser(128,"parsetreeOutFile.txt");
 
 }
 //  bool allComputed = true;

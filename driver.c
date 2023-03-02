@@ -10,9 +10,9 @@ void runLexer(char *fileName, int buffSize)
     printAllTokens(fileName, buffSize);
 }
 
-void runCompleteCode(int buffSize)
+void runCompleteCode(int buffSize,char* fileName)
 {
-    initParser(buffSize);
+    initParser(buffSize,fileName);
 }
 
 void printCommentFreeCode(char *filename)
@@ -20,7 +20,7 @@ void printCommentFreeCode(char *filename)
     removeComments(filename, "dummy.txt");
 }
 
-void calculateRunTime(int buffSize)
+void calculateRunTime(int buffSize,char* fileName)
 {
     clock_t start_time, end_time;
 
@@ -28,7 +28,7 @@ void calculateRunTime(int buffSize)
 
     start_time = clock();
 
-    runCompleteCode(buffSize);
+    runCompleteCode(buffSize,fileName);
 
     end_time = clock();
 
@@ -82,11 +82,11 @@ int main(int argc, char **argv)
             break;
 
         case 3:
-            runCompleteCode((argv[2] - '0'));
+            runCompleteCode((argv[2] - '0'),argv[1]);
             break;
 
         case 4:
-            calculateRunTime((argv[2]-'0'));
+            calculateRunTime((argv[2]-'0'),argv[1]);
             break;
         }
 
